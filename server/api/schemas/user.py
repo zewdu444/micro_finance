@@ -16,7 +16,6 @@ class UserCreate(BaseModel):
     role : Role = Field(..., example="admin")
     photo: Optional[str] = Field(None, example="www.example.jpg")
     hashed_password: str = Field(..., example="123456")
-
 class User(BaseModel):
     id: int = Field(..., example=1)
     username: str = Field(..., example="zewdu4")
@@ -28,6 +27,15 @@ class User(BaseModel):
     photo: Optional[str] = Field(None, example="www.example.jpg")
     status: bool = Field(..., example=True)
     created_at: datetime.datetime = Field(...)
+    updated_at: datetime.datetime = Field(...)
+
+class UserUpdate(BaseModel):
+    firstname:Optional[str] = Field(None, example="Zewdu")
+    lastname: Optional[str] = Field(None, example="Abebe")
+    email: Optional[EmailStr] = Field(None, example="zewdu444@gmail.com")
+    phone: Optional[str] = Field(None, example="+251911223344")
+    role : Optional[Role] = Field(None, example="admin")
+    photo: Optional[str] = Field(None, example="www.example.jpg")
     updated_at: datetime.datetime = Field(...)
 
 

@@ -3,19 +3,10 @@ import schemas.user as schemas
 import models.user as models
 from database import get_db, engine
 from sqlalchemy.orm import Session
-
+import datetime
 router = APIRouter(prefix="/users", tags=["users"], responses={404: {"description": "Not found"}})
 
 models.Base.metadata.create_all(bind=engine)
-
-# create user
-@router.post("/")
-async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = models.User(username=user.username, firstname=user.firstname, lastname=user.lastname, email=user.email, phone=user.phone, role=user.role, photo=user.photo, hashed_password=user.hashed_password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return {"message": "User created successfully"}
 
 
 # get all users
@@ -23,3 +14,44 @@ async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 async def get_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
+
+# get user by id
+@router.get("/{id}", response_model=schemas.User)
+async def get_user(id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if not user:
+        raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
+    else:
+        return user
+
+# update user by id
+@router.put("/{id}")
+async def update_user(id: int, user: schemas.UserUpdate, db: Session = Depends(get_db)):
+     user_update = db.query(models.User).filter(models.User.id == id).first()
+     if user_update is None:
+          raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
+     else:
+            user_update.firstname = user.firstname
+            user_update.lastname = user.lastname
+            user_update.email = user.email
+            user_update.phone = user.phone
+            user_update.role = user.role
+            user_update.photo = user.photo
+            user_update.updated_at =datetime.datetime.utcnow()
+            db.add(user_update)
+            db.commit()
+            return  {"message": "User updated successfully"}
+
+# delete user by id
+@router.delete("/{id}")
+async def delete_user(id: int, db: Session = Depends(get_db)):
+        user_delete = db.query(models.User).filter(models.User.id == id).first()
+        if user_delete is None:
+            raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
+        else:
+                db.delete(user_delete)
+                db.commit()
+                return  {"message": "User deleted successfully"}
+
+def http_exception(status_code, detail):
+    raise HTTPException(status_code=status_code, detail=detail)

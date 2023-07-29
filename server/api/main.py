@@ -6,6 +6,13 @@ app = FastAPI(
   title= "Microfinance API",
   description= "API for Microfinance",
   version= "1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(api_router, prefix="/api/v1")
 
