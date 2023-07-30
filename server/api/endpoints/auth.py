@@ -17,9 +17,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # password hashing
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/users/login")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password,hashed_password)
@@ -49,10 +48,10 @@ def create_access_token(data:dict, expires_delta:timedelta | None =None):
      return encode_jwt
 
 # get current user
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
    try:
       payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-      username: str = payload.get("sub")
+      username: str = payload.get("username")
       if username is None:
          raise get_user_exception()
       current_user = db.query(models.User).filter(models.User.username == username).first()
@@ -63,12 +62,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
       raise get_user_exception()
 
 @router.post("/login")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
       user = authenticate_user(db, form_data.username, form_data.password)
       if not user:
-         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
+         raise get_login_exception()
       access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-      access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+      access_token = create_access_token(data={"username": user.username}, expires_delta=access_token_expires)
       return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register")
@@ -88,3 +87,6 @@ async def  user_registration(user: schemas.UserCreate, db: Session = Depends(get
 # exception handling
 def get_user_exception():
    return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+
+def get_login_exception():
+   return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")

@@ -4,6 +4,7 @@ import models.user as models
 from database import get_db, engine
 from sqlalchemy.orm import Session
 import datetime
+from .auth import get_current_user, get_user_exception
 router = APIRouter(prefix="/users", tags=["users"], responses={404: {"description": "Not found"}})
 
 models.Base.metadata.create_all(bind=engine)
@@ -11,7 +12,9 @@ models.Base.metadata.create_all(bind=engine)
 
 # get all users
 @router.get("/", response_model=list[schemas.User])
-async def get_users(db: Session = Depends(get_db)):
+async def get_users(db: Session = Depends(get_db), user:dict=Depends(get_current_user)):
+    if user is None:
+        raise get_user_exception
     users = db.query(models.User).all()
     return users
 
