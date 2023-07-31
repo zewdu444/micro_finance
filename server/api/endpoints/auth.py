@@ -8,7 +8,7 @@ import schemas.user as schemas
 import models.user as models
 from database import get_db, engine
 from sqlalchemy.orm import Session
-
+from typing import Optional
 router = APIRouter(prefix="/users", tags=["auth"], responses={404: {"description": "Not found"}})
 models.Base.metadata.create_all(bind=engine)
 # sectet key
@@ -72,8 +72,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Sessi
 
 @router.post("/register")
 async def  user_registration(user: schemas.UserCreate, db: Session = Depends(get_db)):
-      find_user = db.query(models.User).filter(models.User.email == user.email).first() or db.query(models.User).filter(models.User.phone == user.phone).first()
-      print(find_user)
+      find_user = db.query(models.User).filter(models.User.email == user.email).first()
       if find_user:
           raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
       else:
@@ -82,8 +81,6 @@ async def  user_registration(user: schemas.UserCreate, db: Session = Depends(get
         db.commit()
         db.refresh(db_user)
         return {"message": "User created successfully"}
-
-
 
 # exception handling
 def get_user_exception():
