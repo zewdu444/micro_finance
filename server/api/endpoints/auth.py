@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from passlib.context import CryptContext
 import schemas.user as schemas
 import models.user as models
@@ -82,6 +82,7 @@ async def  user_registration(user: schemas.UserCreate, db: Session = Depends(get
         db.commit()
         db.refresh(db_user)
         return {"message": "User created successfully"}
+
 
 
 # exception handling
