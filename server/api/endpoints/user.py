@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 import schemas.user as schemas
 import models.user as models
 from database import get_db, engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
+from sqlalchemy import  or_
 import datetime
 import os
 import shutil
 import uuid
+from typing import Optional
 from .auth import get_current_user, get_user_exception
 router = APIRouter(prefix="/users", tags=["users"], responses={404: {"description": "Not found"}})
 
@@ -15,11 +17,53 @@ models.Base.metadata.create_all(bind=engine)
 
 # get all users
 @router.get("/", response_model=list[schemas.User])
-async def get_users(db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+async def get_users(db: Session = Depends(get_db),
+    login_user:dict=Depends(get_current_user),
+    search: Optional[str] = None,
+    filter_field: Optional[str] = None,
+    order_by: Optional[str] = None,
+    order_desc: Optional[bool] = False):
     if login_user is None:
         raise get_user_exception
-    users = db.query(models.User).all()
+    query :Query = db.query(models.User)
+    # search
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(models.User.firstname.ilike(search_term),
+                models.User.lastname.ilike(search_term),
+                models.User.email.ilike(search_term),
+                models.User.phone.ilike(search_term),
+                models.User.role.ilike(search_term),
+                )
+                )
+        try:
+            date_search = datetime.datetime.strptime(search, "%Y-%m-%d")
+            query = query.filter(
+                or_(
+                    models.User.created_at >= date_search,
+                    models.User.updated_at >= date_search,
+                ))
+        except ValueError:
+            pass  # The search term is not a valid date, so we ignore it for date columns
+    # filter by field
+    if filter_field:
+        if filter_field == "role":
+            query = query.filter(models.User.role == "admin")
+        elif filter_field == "status":
+            query = query.filter(models.User.status == "active")
+    # order by
+    if order_by:
+        column_attr = getattr(models.User, order_by, None)
+        if column_attr is not None:
+            if order_desc:
+                 query = query.order_by(column_attr.desc())
+            else:
+                 query = query.order_by(column_attr.asc())
+
+    users = query.all()
     return users
+
 # get user by id
 @router.get("/{id}", response_model=schemas.User)
 async def get_user(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
@@ -82,12 +126,12 @@ def http_exception(status_code, detail):
     raise HTTPException(status_code=status_code, detail=detail)
 
 def store_picture(file):
-    upload_folder = os.path.join(os.getcwd(), "../uploads")
+    upload_folder ="../uploads"
     if not os.path.exists(upload_folder):
         os.mkdir(upload_folder)
     #get destination path
     dest = os.path.join(upload_folder, f"{uuid.uuid1(clock_seq=1)}{file.filename}")
     with open(dest, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    return dest
+    return os.path.realpath(dest)
 
