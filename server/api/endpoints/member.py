@@ -23,36 +23,35 @@ async def get_members(db: Session = Depends(get_db),
                       order_desc: Optional[bool] = False):
     if login_user is None:
         raise get_user_exception
-    query :Query = db.query(Member_models.Member)
+    query :Query = db.query(Member_models.Members)
     # search
     if search:
         search_term = f"%{search}%"
         query = query.filter(
-            or_(Member_models.Member.firstname.ilike(search_term),
-                Member_models.Member.lastname.ilike(search_term),
-                Member_models.Member.email.ilike(search_term),
-                Member_models.Member.phone.ilike(search_term),
-                Member_models.Member.role.ilike(search_term),
+            or_(Member_models.Members.firstname.ilike(search_term),
+                Member_models.Members.lastname.ilike(search_term),
+                Member_models.Members.email.ilike(search_term),
+                Member_models.Members.phone.ilike(search_term),
                 )
                 )
         try:
             date_search = datetime.datetime.strptime(search, "%Y-%m-%d")
             query = query.filter(
                 or_(
-                    Member_models.Member.created_at >= date_search,
-                    Member_models.Member.updated_at >= date_search,
+                    Member_models.Members.created_at >= date_search,
+                    Member_models.Members.updated_at >= date_search,
                 ))
         except ValueError:
             pass
      # filter by field
     if filter_field:
-        if filter_field == "role":
-            query = query.filter(Member_models.Member.role == "admin")
-        elif filter_field == "status":
-            query = query.filter(Member_models.Member.status == "active")
+        if filter_field == "gender":
+            query = query.filter(Member_models.Members.role == "male") or query.filter(Member_models.Members.role == "female")
+        elif filter_field == "marital_status":
+            query = query.filter(Member_models.Members.marital_status == "single")
     # order by
     if order_by:
-        column_attr = getattr(Member_models.Member, order_by, None)
+        column_attr = getattr(Member_models.Members, order_by, None)
         if column_attr is not None:
             if order_desc:
                  query = query.order_by(column_attr.desc())

@@ -25,36 +25,36 @@ async def get_users(db: Session = Depends(get_db),
     order_desc: Optional[bool] = False):
     if login_user is None:
         raise get_user_exception
-    query :Query = db.query(models.User)
+    query :Query = db.query(models.Users)
     # search
     if search:
         search_term = f"%{search}%"
         query = query.filter(
-            or_(models.User.firstname.ilike(search_term),
-                models.User.lastname.ilike(search_term),
-                models.User.email.ilike(search_term),
-                models.User.phone.ilike(search_term),
-                models.User.role.ilike(search_term),
+            or_(models.Users.firstname.ilike(search_term),
+                models.Users.lastname.ilike(search_term),
+                models.Users.email.ilike(search_term),
+                models.Users.phone.ilike(search_term),
+                models.Users.role.ilike(search_term),
                 )
                 )
         try:
             date_search = datetime.datetime.strptime(search, "%Y-%m-%d")
             query = query.filter(
                 or_(
-                    models.User.created_at >= date_search,
-                    models.User.updated_at >= date_search,
+                    models.Users.created_at >= date_search,
+                    models.Users.updated_at >= date_search,
                 ))
         except ValueError:
             pass  # The search term is not a valid date, so we ignore it for date columns
     # filter by field
     if filter_field:
         if filter_field == "role":
-            query = query.filter(models.User.role == "admin")
+            query = query.filter(models.Users.role == "admin")
         elif filter_field == "status":
-            query = query.filter(models.User.status == "active")
+            query = query.filter(models.Users.status == "active")
     # order by
     if order_by:
-        column_attr = getattr(models.User, order_by, None)
+        column_attr = getattr(models.Users, order_by, None)
         if column_attr is not None:
             if order_desc:
                  query = query.order_by(column_attr.desc())
@@ -69,7 +69,7 @@ async def get_users(db: Session = Depends(get_db),
 async def get_user(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
     if login_user is None:
         raise get_user_exception
-    user = db.query(models.User).filter(models.User.id == id).first()
+    user = db.query(models.Users).filter(models.Users.id == id).first()
     if not user:
         raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
     else:
@@ -80,7 +80,7 @@ async def get_user(id: int, db: Session = Depends(get_db), login_user:dict=Depen
 async def update_user(id: int, user: schemas.UserUpdate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
      if login_user is None:
         raise get_user_exception
-     user_update = db.query(models.User).filter(models.User.id == id).first()
+     user_update = db.query(models.Users).filter(models.Users.id == id).first()
      if user_update is None:
           raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
      else:
@@ -100,7 +100,7 @@ async def update_user(id: int, user: schemas.UserUpdate, db: Session = Depends(g
 async def delete_user(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
         if login_user is None:
             raise get_user_exception
-        user_delete = db.query(models.User).filter(models.User.id == id).first()
+        user_delete = db.query(models.Users).filter(models.Users.id == id).first()
         if user_delete is None:
             raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
         else:
@@ -115,7 +115,7 @@ async def upload_profile_image(user:dict=Depends(get_current_user), file: Upload
          raise get_user_exception
      if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
          raise HTTPException(status_code=400, detail="File must be an image")
-     login_user =db.query(models.User).filter(models.User.username==user.username).first()
+     login_user =db.query(models.Users).filter(models.Users.username==user.username).first()
      login_user.photo = store_picture(file)
      login_user.updated_at =datetime.datetime.utcnow()
      db.add(login_user)
