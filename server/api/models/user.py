@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boo
 from sqlalchemy.orm import relationship
 from database import Base
 import datetime
-
-class User(Base):
+from .member import Members
+class Users(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String, unique=True, index=True)
@@ -17,3 +17,4 @@ class User(Base):
     photo = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
+    members = relationship("Members", back_populates="user")
