@@ -60,3 +60,29 @@ async def get_members(db: Session = Depends(get_db),
     members = query.all()
     return members
 
+# get member by id
+
+@router.get("/{id}", response_model=Member_schemas.Member)
+async def get_member(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    member = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+    if not member:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Member with id {id} not found")
+    return member
+# create new member
+@router.post("/")
+async def create_member(member: Member_schemas.MemberCreate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+   find_member = db.query(Member_models.Members).filter(Member_models.Members.email == member.email).first() or db.query(Member_models.Members).filter(Member_models.Members.phone == member.phone).first()
+   if find_member:
+       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{login_user.id}Member already exists")
+   else:
+     new_member=Member_models.Members(**member.dict())
+     new_member.updated_at = datetime.datetime.now()
+     new_member.created_at = datetime.datetime.now()
+     new_member.created_by = login_user.id
+     new_member.updated_by = login_user.id
+     db.add(new_member)
+     db.commit()
+     db.refresh(new_member)
+     return {"message": "Member created successfully"}

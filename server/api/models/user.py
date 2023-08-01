@@ -17,4 +17,5 @@ class Users(Base):
     photo = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
-    members = relationship("Members", back_populates="user")
+    created_members = relationship("Members", foreign_keys=[Members.created_by], back_populates="created_by_user")
+    updated_members = relationship("Members", foreign_keys=[Members.updated_by], back_populates="updated_by_user")

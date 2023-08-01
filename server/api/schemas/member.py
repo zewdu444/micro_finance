@@ -17,7 +17,7 @@ class MaritalStatus(str, Enum):
     widowed = "widowed"
 
 class MemberCreate(BaseModel):
-   firtname: str = Field(..., example="Zewdu")
+   firstname: str = Field(..., example="Zewdu")
    middlename : str = Field(..., example="Erkyhun")
    lastname : str = Field(..., example="Anley")
    country : str = Field(..., example="Ethiopia")
@@ -35,7 +35,7 @@ class MemberCreate(BaseModel):
    emergency_contact_name: str = Field(...,example="minilik")
    emergency_contact_phone: str = Field(...,example="+251911223344")
    emergency_contact_relation: str = Field(...,example="brother")
-   is_currently_employed: bool = Field(...,example=True)
+   is_currently_borrowed: bool = Field(...,example=True)
    borrowed_bank: str = Field(...,example="CBE")
    ekub_member: bool = Field(...,example=True)
    loan_member: bool = Field(...,example=True)
@@ -44,6 +44,8 @@ class MemberCreate(BaseModel):
    share_member: bool = Field(...,example=True)
    created_at: datetime.datetime = Field(...)
    updated_at: datetime.datetime = Field(...)
+   created_by: int = Field(..., example=1)
+   updated_by: int = Field(..., example=1)
 
 class MemberUpdate(BaseModel):
    firtname: Optional[str] = Field(None, example="Zewdu")
@@ -64,7 +66,7 @@ class MemberUpdate(BaseModel):
    emergency_contact_name: Optional[str] = Field(None,example="minilik")
    emergency_contact_phone: Optional[str] = Field(None,example="+251911223344")
    emergency_contact_relation: Optional[str] = Field(None,example="brother")
-   is_currently_employed: Optional[bool] = Field(None,example=True)
+   is_currently_borrowed: bool = Field(...,example=True)
    borrowed_bank: Optional[str] = Field(None,example="CBE")
    ekub_member: Optional[bool] = Field(None,example=True)
    loan_member: Optional[bool] = Field(None,example=True)
@@ -72,7 +74,7 @@ class MemberUpdate(BaseModel):
    commission_member: Optional[bool] = Field(None,example=True)
    share_member: Optional[bool] = Field(None,example=True)
    updated_at: datetime.datetime = Field(...)
-
+   updated_by: int = Field(..., example=1)
 class Member(BaseModel):
    id: int = Field(..., example=1)
    firtname: str = Field(..., example="Zewdu")
@@ -93,7 +95,7 @@ class Member(BaseModel):
    emergency_contact_name: str = Field(...,example="minilik")
    emergency_contact_phone: str = Field(...,example="+251911223344")
    emergency_contact_relation: str = Field(...,example="brother")
-   is_currently_employed: bool = Field(...,example=True)
+   is_currently_borrowed: bool = Field(...,example=True)
    borrowed_bank: str = Field(...,example="CBE")
    ekub_member: bool = Field(...,example=True)
    loan_member: bool = Field(...,example=True)
@@ -102,4 +104,5 @@ class Member(BaseModel):
    share_member: bool = Field(...,example=True)
    created_at: datetime.datetime = Field(...)
    updated_at: datetime.datetime = Field(...)
-   user_id: int = Field(..., example=1)
+   created_by: int = Field(..., example=1)
+   updated_by: int = Field(..., example=1)

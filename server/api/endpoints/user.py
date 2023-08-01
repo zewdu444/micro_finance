@@ -135,3 +135,4 @@ def store_picture(file):
         shutil.copyfileobj(file.file, buffer)
     return os.path.realpath(dest)
 
+#
