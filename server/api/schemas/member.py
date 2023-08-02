@@ -42,11 +42,6 @@ class MemberCreate(BaseModel):
    insurance_member: bool = Field(...,example=True)
    commission_member: bool = Field(...,example=True)
    share_member: bool = Field(...,example=True)
-   created_at: datetime.datetime = Field(...)
-   updated_at: datetime.datetime = Field(...)
-   created_by: int = Field(..., example=1)
-   updated_by: int = Field(..., example=1)
-
 class MemberUpdate(BaseModel):
    firstname: Optional[str] = Field(None, example="Zewdu")
    middlename : Optional[str] = Field(None, example="Erkyhun")

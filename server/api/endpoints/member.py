@@ -77,7 +77,7 @@ async def create_member(member: Member_schemas.MemberCreate, db: Session = Depen
       raise get_user_exception
    find_member = db.query(Member_models.Members).filter(Member_models.Members.email == member.email).first() or db.query(Member_models.Members).filter(Member_models.Members.phone == member.phone).first()
    if find_member:
-       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{login_user.id}Member already exists")
+       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Member already exists")
    else:
      new_member=Member_models.Members(**member.dict())
      new_member.updated_at = datetime.datetime.now()
@@ -114,4 +114,4 @@ async def delete_member(id: int, db: Session = Depends(get_db), login_user:dict=
     else:
         db.delete(member_delete)
         db.commit()
-        return  {"message": "User deleted successfully"}
+        return  {"message": "Member deleted successfully"}
