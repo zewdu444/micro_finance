@@ -84,14 +84,9 @@ async def update_user(id: int, user: schemas.UserUpdate, db: Session = Depends(g
      if user_update is None:
           raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
      else:
-            user_update.firstname = user.firstname
-            user_update.lastname = user.lastname
-            user_update.email = user.email
-            user_update.phone = user.phone
-            user_update.role = user.role
-            user_update.photo = user.photo
+            for key, value in user.dict(exclude_unset=True).items():
+                setattr(user_update, key, value)
             user_update.updated_at =datetime.datetime.utcnow()
-            db.add(user_update)
             db.commit()
             return  {"message": "User updated successfully"}
 
@@ -134,5 +129,3 @@ def store_picture(file):
     with open(dest, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     return os.path.realpath(dest)
-
-#

@@ -73,6 +73,8 @@ async def get_member(id: int, db: Session = Depends(get_db), login_user:dict=Dep
 # create new member
 @router.post("/")
 async def create_member(member: Member_schemas.MemberCreate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+   if login_user is None:
+      raise get_user_exception
    find_member = db.query(Member_models.Members).filter(Member_models.Members.email == member.email).first() or db.query(Member_models.Members).filter(Member_models.Members.phone == member.phone).first()
    if find_member:
        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{login_user.id}Member already exists")
@@ -86,3 +88,30 @@ async def create_member(member: Member_schemas.MemberCreate, db: Session = Depen
      db.commit()
      db.refresh(new_member)
      return {"message": "Member created successfully"}
+
+ # update member
+@router.put("/{id}")
+async def update_member(id:int, member:Member_schemas.MemberUpdate, db:Session=Depends(get_db),login_user:dict =Depends(get_current_user)):
+     if login_user is None:
+         raise get_user_exception
+     member_update = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+     if member_update is None:
+        raise http_exception(status.HTTP_404_NOT_FOUND, f"member with id {id} not found")
+     else:
+        for key, value in member.dict(exclude_unset=True).items():
+                setattr(member_update, key, value)
+        member_update.updated_at =datetime.datetime.now()
+        member_update.updated_by =login_user.id
+        db.commit()
+        return {"message":"Member updated successfully"}
+@router.delete("/{id}")
+async def delete_member(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+         raise get_user_exception
+    member_delete = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+    if member_delete is None:
+        raise http_exception(status.HTTP_404_NOT_FOUND, f"member with id {id} not found")
+    else:
+        db.delete(member_delete)
+        db.commit()
+        return  {"message": "User deleted successfully"}
