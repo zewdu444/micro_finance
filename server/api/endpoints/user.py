@@ -5,9 +5,7 @@ from database import get_db, engine
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import  or_
 import datetime
-import os
-import shutil
-import uuid
+from utils.fileupload import store_picture
 from typing import Optional
 from .auth import get_current_user, get_user_exception
 router = APIRouter(prefix="/users", tags=["users"], responses={404: {"description": "Not found"}})
@@ -111,7 +109,7 @@ async def upload_profile_image(user:dict=Depends(get_current_user), file: Upload
      if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
          raise HTTPException(status_code=400, detail="File must be an image")
      login_user =db.query(models.Users).filter(models.Users.username==user.username).first()
-     login_user.photo = store_picture(file)
+     login_user.photo = store_picture(file,"../uploads")
      login_user.updated_at =datetime.datetime.utcnow()
      db.add(login_user)
      db.commit()
@@ -120,12 +118,3 @@ async def upload_profile_image(user:dict=Depends(get_current_user), file: Upload
 def http_exception(status_code, detail):
     raise HTTPException(status_code=status_code, detail=detail)
 
-def store_picture(file):
-    upload_folder ="../uploads"
-    if not os.path.exists(upload_folder):
-        os.mkdir(upload_folder)
-    #get destination path
-    dest = os.path.join(upload_folder, f"{uuid.uuid1(clock_seq=1)}{file.filename}")
-    with open(dest, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return os.path.realpath(dest)
