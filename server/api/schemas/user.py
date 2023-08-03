@@ -36,7 +36,6 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = Field(None, example="+251911223344")
     role : Optional[Role] = Field(None, example="admin")
     photo: Optional[str] = Field(None, example="www.example.jpg")
-    updated_at: datetime.datetime = Field(...)
 
 class UserResetPassword(BaseModel):
      email: Optional[EmailStr] = Field(None, example="zewdu444@gmail.com")

@@ -10,6 +10,7 @@ import shutil
 import uuid
 from typing import Optional
 from .auth import get_current_user, get_user_exception
+from utils.fileupload import store_picture
 router = APIRouter(prefix="/members", tags=["members"], responses={404: {"description": "Not found"}})
 Member_models.Base.metadata.create_all(bind=engine)
 
@@ -96,7 +97,7 @@ async def update_member(id:int, member:Member_schemas.MemberUpdate, db:Session=D
          raise get_user_exception
      member_update = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
      if member_update is None:
-        raise http_exception(status.HTTP_404_NOT_FOUND, f"member with id {id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"member with id {id} not found")
      else:
         for key, value in member.dict(exclude_unset=True).items():
                 setattr(member_update, key, value)
@@ -104,14 +105,32 @@ async def update_member(id:int, member:Member_schemas.MemberUpdate, db:Session=D
         member_update.updated_by =login_user.id
         db.commit()
         return {"message":"Member updated successfully"}
+# delete member
 @router.delete("/{id}")
 async def delete_member(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
     if login_user is None:
          raise get_user_exception
     member_delete = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
     if member_delete is None:
-        raise http_exception(status.HTTP_404_NOT_FOUND, f"member with id {id} not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"member with id {id} not found")
     else:
         db.delete(member_delete)
         db.commit()
         return  {"message": "Member deleted successfully"}
+
+# upload profile picture
+@router.put("/uploadprofile/{id}}")
+async def upload_profile_image(id:int, login_user:dict=Depends(get_current_user), file: UploadFile = File(...), db: Session = Depends(get_db)):
+     if login_user is None:
+         raise get_user_exception
+     if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
+         raise HTTPException(status_code=400, detail="File must be an image")
+     member_update_picture = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+     if member_update_picture is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"member with id {id} not found")
+     else:
+        member_update_picture.photo = store_picture(file,"../uploads")
+        member_update_picture.updated_at =datetime.datetime.utcnow()
+        member_update_picture.updated_by =login_user.id
+        db.commit()
+     return {"message": "Profile image uploaded successfully"}
