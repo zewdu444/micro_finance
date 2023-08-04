@@ -8,10 +8,49 @@ import datetime
 from utils.fileupload import store_picture
 from typing import Optional
 from .auth import get_current_user, get_user_exception
+from sqlalchemy_filters import apply_filters, apply_sort, apply_pagination
 router = APIRouter(prefix="/users", tags=["users"], responses={404: {"description": "Not found"}})
 
 models.Base.metadata.create_all(bind=engine)
 
+@router.post("/checking_filter", response_model=list[schemas.User])
+async def checking_filter(db: Session = Depends(get_db),
+                           login_user:dict=Depends(get_current_user),
+                           search: Optional[str] = None,
+                           role: Optional[str] = None,
+                           staus: Optional[str] = None,
+                           order_by: Optional[str] = None):
+    if login_user is None:
+        raise get_user_exception
+    query :Query = db.query(models.Users)
+    # search by field
+    if search:
+        search_term = f"%{search}%"
+        search_fields = [
+           {
+            'or': [
+                {'field':'username', 'op':'ilike', 'value':search_term},
+                {'field': 'firstname', 'op': 'ilike', 'value': search_term},
+                {'field':'lastname', 'op': 'ilike', 'value': search_term},
+                {'field':'email','op':'ilike', 'value':search_term},
+                {'field':'phone','op':'ilike', 'value':search_term},
+            ],
+
+           }
+        ]
+        query = apply_filters(query, search_fields, search_term)
+    # filter by field
+    if role:
+        role_filter = [{'field':'role', 'op': '==', 'value': role}, ]
+        query = apply_filters(query, role_filter, role)
+    if staus:
+        status_filter = [{'field':'status', 'op': '==', 'value': staus}, ]
+        query = apply_filters(query, status_filter, staus)
+    # order by
+    if order_by:
+        order_by_fields = ["firstname", "lastname", "email", "phone", "role"]
+        query = apply_sort(query, order_by_fields, order_by)
+    return query.all()
 
 # get all users
 @router.get("/", response_model=list[schemas.User])

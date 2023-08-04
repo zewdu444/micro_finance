@@ -17,7 +17,7 @@ Member_models.Base.metadata.create_all(bind=engine)
 #  get all members
 @router.get("/", response_model=list[Member_schemas.Member])
 async def get_members(db: Session = Depends(get_db),
-                       login_user:dict=Depends(get_current_user),
+                      login_user:dict=Depends(get_current_user),
                       search: Optional[str] = None,
                       filter_field: Optional[str] = None,
                       order_by: Optional[str] = None,
