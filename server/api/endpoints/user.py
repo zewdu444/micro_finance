@@ -13,13 +13,16 @@ router = APIRouter(prefix="/users", tags=["users"], responses={404: {"descriptio
 
 models.Base.metadata.create_all(bind=engine)
 
-@router.post("/checking_filter", response_model=list[schemas.User])
-async def checking_filter(db: Session = Depends(get_db),
+# get all users
+@router.get("/", response_model=list[schemas.User])
+async def get_users(db: Session = Depends(get_db),
                            login_user:dict=Depends(get_current_user),
                            search: Optional[str] = None,
                            role: Optional[str] = None,
                            staus: Optional[str] = None,
-                           order_by: Optional[str] = None):
+                           sorted_by: Optional[str] = None,
+                           page_number: Optional[int] = 1,
+                           page_size: Optional[int] = 10):
     if login_user is None:
         raise get_user_exception
     query :Query = db.query(models.Users)
@@ -29,6 +32,7 @@ async def checking_filter(db: Session = Depends(get_db),
         search_fields = [
            {
             'or': [
+                {'field':'username', 'op':'ilike', 'value':search_term},
                 {'field':'username', 'op':'ilike', 'value':search_term},
                 {'field': 'firstname', 'op': 'ilike', 'value': search_term},
                 {'field':'lastname', 'op': 'ilike', 'value': search_term},
@@ -47,59 +51,14 @@ async def checking_filter(db: Session = Depends(get_db),
         status_filter = [{'field':'status', 'op': '==', 'value': staus}, ]
         query = apply_filters(query, status_filter, staus)
     # order by
-    if order_by:
-        order_by_fields = ["firstname", "lastname", "email", "phone", "role"]
-        query = apply_sort(query, order_by_fields, order_by)
+    if sorted_by:
+        sorted_by_fields = [{'field': sorted_by, 'direction': 'asc'}]
+        query = apply_sort(query, sorted_by_fields)
+    # pagination
+    query, pagination = apply_pagination(query, page_number=1, page_size=10)
+    if len(query.all()) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found")
     return query.all()
-
-# get all users
-@router.get("/", response_model=list[schemas.User])
-async def get_users(db: Session = Depends(get_db),
-    login_user:dict=Depends(get_current_user),
-    search: Optional[str] = None,
-    filter_field: Optional[str] = None,
-    order_by: Optional[str] = None,
-    order_desc: Optional[bool] = False):
-    if login_user is None:
-        raise get_user_exception
-    query :Query = db.query(models.Users)
-    # search
-    if search:
-        search_term = f"%{search}%"
-        query = query.filter(
-            or_(models.Users.firstname.ilike(search_term),
-                models.Users.lastname.ilike(search_term),
-                models.Users.email.ilike(search_term),
-                models.Users.phone.ilike(search_term),
-                models.Users.role.ilike(search_term),
-                )
-                )
-        try:
-            date_search = datetime.datetime.strptime(search, "%Y-%m-%d")
-            query = query.filter(
-                or_(
-                    models.Users.created_at >= date_search,
-                    models.Users.updated_at >= date_search,
-                ))
-        except ValueError:
-            pass  # The search term is not a valid date, so we ignore it for date columns
-    # filter by field
-    if filter_field:
-        if filter_field == "role":
-            query = query.filter(models.Users.role == "admin")
-        elif filter_field == "status":
-            query = query.filter(models.Users.status == "active")
-    # order by
-    if order_by:
-        column_attr = getattr(models.Users, order_by, None)
-        if column_attr is not None:
-            if order_desc:
-                 query = query.order_by(column_attr.desc())
-            else:
-                 query = query.order_by(column_attr.asc())
-
-    users = query.all()
-    return users
 
 # get user by id
 @router.get("/{id}", response_model=schemas.User)
