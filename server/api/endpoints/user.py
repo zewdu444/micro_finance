@@ -20,7 +20,7 @@ async def get_users(db: Session = Depends(get_db),
                            search: Optional[str] = None,
                            role: Optional[str] = None,
                            staus: Optional[str] = None,
-                           sorted_by: Optional[str] = None,
+                           sort_by: Optional[str] = None,
                            page_number: Optional[int] = 1,
                            page_size: Optional[int] = 10):
     if login_user is None:
@@ -39,7 +39,6 @@ async def get_users(db: Session = Depends(get_db),
                 {'field':'email','op':'ilike', 'value':search_term},
                 {'field':'phone','op':'ilike', 'value':search_term},
             ],
-
            }
         ]
         query = apply_filters(query, search_fields, search_term)
@@ -51,8 +50,8 @@ async def get_users(db: Session = Depends(get_db),
         status_filter = [{'field':'status', 'op': '==', 'value': staus}, ]
         query = apply_filters(query, status_filter, staus)
     # order by
-    if sorted_by:
-        sorted_by_fields = [{'field': sorted_by, 'direction': 'asc'}]
+    if sort_by:
+        sorted_by_fields = [{'field': sort_by, 'direction': 'asc'}]
         query = apply_sort(query, sorted_by_fields)
     # pagination
     query, pagination = apply_pagination(query, page_number=1, page_size=10)
