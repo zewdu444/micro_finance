@@ -21,3 +21,7 @@ async def reset_password(user: schemas.UserResetPassword, db: Session = Depends(
   db.add(find_user)
   db.commit()
   return {"message": "Password reset successfully"}
+
+@router.post("/send_forget_password_email")
+def send_forget_passowrd_email():
+    return {"message":"send forget password email "}
