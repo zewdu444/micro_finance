@@ -6,6 +6,7 @@ from database import get_db, engine
 from sqlalchemy.orm import Session
 from .auth  import get_password_hash
 import datetime
+from .auth import create_access_token
 router = APIRouter(tags=["password management"], responses={404: {"description": "Not found"}})
 models.Base.metadata.create_all(bind=engine)
 
