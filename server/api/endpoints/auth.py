@@ -9,12 +9,13 @@ import models.user as models
 from database import get_db, engine
 from sqlalchemy.orm import Session
 from typing import Optional
+from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 router = APIRouter(prefix="/users", tags=["auth"], responses={404: {"description": "Not found"}})
 models.Base.metadata.create_all(bind=engine)
 # sectet key
-SECRET_KEY = "87731cc1b6ed7cc24da36b867bfbbc7823ff499f7c50e4d35c18f23d739615a6"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = SECRET_KEY
+ALGORITHM = ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
 
 # password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -4,3 +4,4 @@ server/env
 
 server/uploads
 __pycache__
+.env

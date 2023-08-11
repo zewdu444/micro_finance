@@ -11,11 +11,12 @@ from .auth import create_access_token
 from pathlib import Path
 from utils.email import password_request_mail
 from schemas.email import PasswordRequestSchema
+from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 router = APIRouter(tags=["password management"], responses={404: {"description": "Not found"}})
 models.Base.metadata.create_all(bind=engine)
 
-SECRET_KEY = "87731cc1b6ed7cc24da36b867bfbbc7823ff499f7c50e4d35c18f23d739615a6"
-ALGORITHM = "HS256"
+SECRET_KEY = SECRET_KEY
+ALGORITHM = ALGORITHM
 
 @router.post("/send_reset_email")
 async def send_reset_email(email:str, db: Session = Depends(get_db)):
@@ -23,7 +24,7 @@ async def send_reset_email(email:str, db: Session = Depends(get_db)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User does not exist")
     #  generate token
-    token = create_access_token(data={"email": email}, expires_delta=datetime.timedelta(hours=1))
+    token = create_access_token(data={"email": email}, expires_delta=datetime.timedelta(minutes=30))
     #  send email
     password_request_data = {
     "email": ["zewdu.erkyhun@yandex.com"],
