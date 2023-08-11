@@ -38,8 +38,6 @@ class UserUpdate(BaseModel):
     photo: Optional[str] = Field(None, example="www.example.jpg")
 
 class UserResetPassword(BaseModel):
-     email: Optional[EmailStr] = Field(None, example="zewdu444@gmail.com")
-     username: Optional[str] = Field(None, example="zewdu4")
      password: str = Field(..., example="123456")
      confirm_password: str = Field(..., example="123456")
 

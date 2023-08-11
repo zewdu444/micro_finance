@@ -1,5 +1,5 @@
 from pathlib import Path
-from schemas.email import  EmailSchema
+from schemas.email import  PasswordRequestSchema
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
 conf = ConnectionConfig(
@@ -13,9 +13,9 @@ conf = ConnectionConfig(
     MAIL_SSL_TLS = False,
     TEMPLATE_FOLDER =  Path(__file__).parent / '../templates/email')
 
-async def password_request_mail(email:EmailSchema):
+async def password_request_mail(email:PasswordRequestSchema):
     message = MessageSchema(
-        subject=email.subject,
+         subject=email.dict().get("subject"),
          recipients=email.dict().get("email"),
          template_body=email.dict().get("body"),
          subtype= MessageType.html)
