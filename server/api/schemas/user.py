@@ -17,7 +17,7 @@ class UserCreate(BaseModel):
     photo: Optional[str] = Field(None, example="www.example.jpg")
     hashed_password: str = Field(..., example="123456")
 class User(BaseModel):
-    id: int = Field(..., example=1)
+    user_id: int = Field(..., example=1)
     username: str = Field(..., example="zewdu4")
     firstname: str = Field(..., example="Zewdu")
     lastname: str = Field(..., example="Abebe")

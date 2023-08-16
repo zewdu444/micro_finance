@@ -5,7 +5,7 @@ import datetime
 from .member import Members
 class Users(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String, unique=True, index=True)
     firstname = Column(String(100))
     lastname = Column(String(100))

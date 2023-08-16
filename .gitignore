@@ -1,7 +1,5 @@
 server/env
-/micro.pdf
-/micro.png
-
+/micro.jpg
 server/uploads
 __pycache__
 .env

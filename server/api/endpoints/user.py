@@ -64,7 +64,7 @@ async def get_users(db: Session = Depends(get_db),
 async def get_user(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
     if login_user is None:
         raise get_user_exception
-    user = db.query(models.Users).filter(models.Users.id == id).first()
+    user = db.query(models.Users).filter(models.Users.user_id == id).first()
     if not user:
         raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
     else:
@@ -75,7 +75,7 @@ async def get_user(id: int, db: Session = Depends(get_db), login_user:dict=Depen
 async def update_user(id: int, user: schemas.UserUpdate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
      if login_user is None:
         raise get_user_exception
-     user_update = db.query(models.Users).filter(models.Users.id == id).first()
+     user_update = db.query(models.Users).filter(models.Users.user_id == id).first()
      if user_update is None:
           raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
      else:
@@ -90,7 +90,7 @@ async def update_user(id: int, user: schemas.UserUpdate, db: Session = Depends(g
 async def delete_user(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
         if login_user is None:
             raise get_user_exception
-        user_delete = db.query(models.Users).filter(models.Users.id == id).first()
+        user_delete = db.query(models.Users).filter(models.Users.user_id == id).first()
         if user_delete is None:
             raise http_exception(status.HTTP_404_NOT_FOUND, f"User with id {id} not found")
         else:

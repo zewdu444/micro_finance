@@ -67,7 +67,7 @@ async def get_members(db: Session = Depends(get_db),
 async def get_member(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
     if login_user is None:
         raise get_user_exception
-    member = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+    member = db.query(Member_models.Members).filter(Member_models.Members.member_id == id).first()
     if not member:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Member with id {id} not found")
     return member
@@ -95,7 +95,7 @@ async def create_member(member: Member_schemas.MemberCreate, db: Session = Depen
 async def update_member(id:int, member:Member_schemas.MemberUpdate, db:Session=Depends(get_db),login_user:dict =Depends(get_current_user)):
      if login_user is None:
          raise get_user_exception
-     member_update = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+     member_update = db.query(Member_models.Members).filter(Member_models.Members.member_id == id).first()
      if member_update is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"member with id {id} not found")
      else:
@@ -110,7 +110,7 @@ async def update_member(id:int, member:Member_schemas.MemberUpdate, db:Session=D
 async def delete_member(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
     if login_user is None:
          raise get_user_exception
-    member_delete = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+    member_delete = db.query(Member_models.Members).filter(Member_models.Members.member_id == id).first()
     if member_delete is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"member with id {id} not found")
     else:
@@ -125,7 +125,7 @@ async def upload_profile_image(id:int, login_user:dict=Depends(get_current_user)
          raise get_user_exception
      if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
          raise HTTPException(status_code=400, detail="File must be an image")
-     member_update_picture = db.query(Member_models.Members).filter(Member_models.Members.id == id).first()
+     member_update_picture = db.query(Member_models.Members).filter(Member_models.Members.member_id == id).first()
      if member_update_picture is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"member with id {id} not found")
      else:

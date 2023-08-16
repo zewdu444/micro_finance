@@ -69,7 +69,7 @@ class MemberUpdate(BaseModel):
    commission_member: Optional[bool] = Field(None,example=True)
    share_member: Optional[bool] = Field(None,example=True)
 class Member(BaseModel):
-   id: int = Field(..., example=1)
+   member_id: int = Field(..., example=1)
    firstname: str = Field(..., example="Zewdu")
    middlename : str = Field(..., example="Erkyhun")
    lastname : str = Field(..., example="Anley")

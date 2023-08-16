@@ -4,7 +4,7 @@ from database import Base
 import datetime
 class Members(Base):
     __tablename__ = "members"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    member_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     firstname = Column(String(100))
     middlename = Column(String(100))
     lastname = Column(String(100))
@@ -32,7 +32,7 @@ class Members(Base):
     share_member =Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
-    created_by = Column(Integer, ForeignKey("users.id"))
-    updated_by = Column(Integer, ForeignKey("users.id"))
+    created_by = Column(Integer, ForeignKey("users.user_id"))
+    updated_by = Column(Integer, ForeignKey("users.user_id"))
     created_by_user = relationship("Users", foreign_keys=[created_by], back_populates="created_members")
     updated_by_user = relationship("Users", foreign_keys=[updated_by], back_populates="updated_members")
