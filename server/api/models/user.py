@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from database import Base
 import datetime
 from .member import Members
+from .loan import Loan_applications, Loan_transactions
 class Users(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -19,3 +20,7 @@ class Users(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
     created_members = relationship("Members", foreign_keys=[Members.created_by], back_populates="created_by_user")
     updated_members = relationship("Members", foreign_keys=[Members.updated_by], back_populates="updated_by_user")
+    created_loan_applications = relationship("Loan_applications", foreign_keys=[Loan_applications.created_by], back_populates="created_by_user")
+    updated_loan_applications = relationship("Loan_applications", foreign_keys=[Loan_applications.updated_by], back_populates="updated_by_user")
+    created_loan_transactions = relationship("Loan_transactions", foreign_keys=[Loan_transactions.created_by], back_populates="created_by_user")
+    updated_loan_transactions = relationship("Loan_transactions", foreign_keys=[Loan_transactions.updated_by], back_populates="updated_by_user")
