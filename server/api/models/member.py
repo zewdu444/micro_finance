@@ -37,3 +37,6 @@ class Members(Base):
     users = relationship("Users", back_populates="members")
     ekub_applications = relationship("Ekub_applications", back_populates="members")
     loan_applications = relationship("Loan_applications", back_populates="members")
+    ekub_members = relationship("Ekub_members", back_populates="members")
+    share_applications = relationship("Share_applications", back_populates="members")
+    share_transactions = relationship("Share_transactions", back_populates="members")
