@@ -7,6 +7,7 @@ import datetime
 class Loan_applications(Base):
     __tablename__ = "loan_applications"
     loan_id = Column(Integer, primary_key=True, index=True)
+    member_id = Column(Integer, ForeignKey("members.member_id"))
     loan_type = Column(String)
     requested_amount = Column(Float)
     interest_rate = Column(Float)
@@ -17,9 +18,9 @@ class Loan_applications(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
     created_by = Column(Integer, ForeignKey("users.user_id"))
     updated_by = Column(Integer, ForeignKey("users.user_id"))
-    created_by_user = relationship("Users", foreign_keys=[created_by], back_populates="created_loan_applications")
-    updated_by_user = relationship("Users", foreign_keys=[updated_by], back_populates="updated_loan_applications")
-    loan_transactions = relationship("Loan_transactions", back_populates="loan_application")
+    users = relationship("Users",back_populates="loan_applications")
+    loan_transactions = relationship("Loan_transactions", back_populates="loan_applications")
+    members = relationship("Members", back_populates="loan_applications")
 
 class Loan_transactions(Base):
   __tablename__ = "loan_transactions"
@@ -30,10 +31,10 @@ class Loan_transactions(Base):
   description = Column(String)
   source_account = Column(String)
   destination_account = Column(String)
+  related_document = Column(String)
   created_at = Column(DateTime, default=datetime.datetime.utcnow)
   updated_at = Column(DateTime, default=datetime.datetime.utcnow)
   created_by = Column(Integer, ForeignKey("users.user_id"))
   updated_by = Column(Integer, ForeignKey("users.user_id"))
-  created_by_user = relationship("Users", foreign_keys=[created_by], back_populates="created_loan_transactions")
-  updated_by_user = relationship("Users", foreign_keys=[updated_by], back_populates="updated_loan_transactions")
-  loan_application = relationship("Loan_applications", back_populates="loan_transactions")
+  users = relationship("Users",back_populates="loan_transactions")
+  loan_applications = relationship("Loan_applications", back_populates="loan_transactions")

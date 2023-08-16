@@ -34,5 +34,6 @@ class Members(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
     created_by = Column(Integer, ForeignKey("users.user_id"))
     updated_by = Column(Integer, ForeignKey("users.user_id"))
-    created_by_user = relationship("Users", foreign_keys=[created_by], back_populates="created_members")
-    updated_by_user = relationship("Users", foreign_keys=[updated_by], back_populates="updated_members")
+    users = relationship("Users", back_populates="members")
+    ekub_applications = relationship("Ekub_applications", back_populates="members")
+    loan_applications = relationship("Loan_applications", back_populates="members")

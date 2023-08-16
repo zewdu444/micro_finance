@@ -4,6 +4,7 @@ from database import Base
 import datetime
 from .member import Members
 from .loan import Loan_applications, Loan_transactions
+from .ekub import Ekub_applications
 class Users(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -18,9 +19,9 @@ class Users(Base):
     photo = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
-    created_members = relationship("Members", foreign_keys=[Members.created_by], back_populates="created_by_user")
-    updated_members = relationship("Members", foreign_keys=[Members.updated_by], back_populates="updated_by_user")
-    created_loan_applications = relationship("Loan_applications", foreign_keys=[Loan_applications.created_by], back_populates="created_by_user")
-    updated_loan_applications = relationship("Loan_applications", foreign_keys=[Loan_applications.updated_by], back_populates="updated_by_user")
-    created_loan_transactions = relationship("Loan_transactions", foreign_keys=[Loan_transactions.created_by], back_populates="created_by_user")
-    updated_loan_transactions = relationship("Loan_transactions", foreign_keys=[Loan_transactions.updated_by], back_populates="updated_by_user")
+    members = relationship("Members", back_populates="users")
+    loan_applications = relationship("Loan_applications", back_populates="users")
+    loan_transactions = relationship("Loan_transactions", back_populates="users")
+    ekub_applications = relationship("Ekub_applications",back_populates= "users")
+    ekub_members = relationship("Ekub_members", back_populates="users")
+    ekub_transactions = relationship("Ekub_transactions", back_populates="users")
