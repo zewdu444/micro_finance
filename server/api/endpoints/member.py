@@ -3,7 +3,7 @@ import schemas.member as Member_schemas
 import models.member as Member_models
 import models.user as User_models
 from database import get_db, engine
-from sqlalchemy.orm import Session, Query, joinedload
+from sqlalchemy.orm import Session, Query
 from sqlalchemy import  or_
 import datetime
 import os
@@ -12,6 +12,7 @@ import uuid
 from typing import Optional
 from .auth import get_current_user, get_user_exception
 from utils.fileupload import store_picture
+from sqlalchemy_filters import apply_filters, apply_sort, apply_pagination
 router = APIRouter(prefix="/members", tags=["members"], responses={404: {"description": "Not found"}})
 Member_models.Base.metadata.create_all(bind=engine)
 
@@ -20,46 +21,57 @@ Member_models.Base.metadata.create_all(bind=engine)
 async def get_members(db: Session = Depends(get_db),
                       login_user:dict=Depends(get_current_user),
                       search: Optional[str] = None,
-                      filter_field: Optional[str] = None,
-                      order_by: Optional[str] = None,
-                      order_desc: Optional[bool] = False):
+                      marital_status: Optional[str] = None,
+                      employment_status: Optional[str] = None,
+                      gender : Optional[str] = None,
+                      sort_by: Optional[str] = None,
+                      page_number: Optional[int] = 1,
+                      page_size: Optional[int] = 10):
     if login_user is None:
         raise get_user_exception
     query :Query = db.query(Member_models.Members)
     # search
     if search:
         search_term = f"%{search}%"
-        query = query.filter(
-            or_(Member_models.Members.firstname.ilike(search_term),
-                Member_models.Members.lastname.ilike(search_term),
-                Member_models.Members.email.ilike(search_term),
-                Member_models.Members.phone.ilike(search_term),
-                )
-                )
-        try:
-            date_search = datetime.datetime.strptime(search, "%Y-%m-%d")
-            query = query.filter(
-                or_(
-                    Member_models.Members.created_at >= date_search,
-                    Member_models.Members.updated_at >= date_search,
-                ))
-        except ValueError:
-            pass
-     # filter by field
-    if filter_field:
-        if filter_field == "gender":
-            query = query.filter(Member_models.Members.role == "male") or query.filter(Member_models.Members.role == "female")
-        elif filter_field == "marital_status":
-            query = query.filter(Member_models.Members.marital_status == "single")
-    # order by
-    if order_by:
-        column_attr = getattr(Member_models.Members, order_by, None)
-        if column_attr is not None:
-            if order_desc:
-                 query = query.order_by(column_attr.desc())
-            else:
-                query = query.order_by(column_attr.asc())
+        search_fields = [
+           {
+            'or': [
+                {'field':'firstname', 'op':'ilike', 'value':search_term},
+                {'field':'middlename', 'op':'ilike', 'value':search_term},
+                {'field':'lastname', 'op':'ilike', 'value':search_term},
+                {'field':'email','op':'ilike', 'value':search_term},
+                {'field':'phone','op':'ilike', 'value':search_term},
+                {'field':'emergency_contact_name','op':'ilike', 'value':search_term},
+                {'field':'emergency_contact_phone','op':'ilike', 'value':search_term},
+                {'field':'emergency_contact_relation','op':'ilike', 'value':search_term},
+                {'field':'city','op':'ilike', 'value':search_term},
+                {'field':'sub_city','op':'ilike', 'value':search_term},
+                {'field':'wereda','op':'ilike', 'value':search_term},
+                {'field':'kebele','op':'ilike', 'value':search_term},
+                {'field':'country','op':'ilike', 'value':search_term},
 
+            ],
+           }
+        ]
+        query = apply_filters(query, search_fields, search_term)
+    # filter by field
+    if marital_status:
+        marital_status_filter = [{'field':'marital_status', 'op': '==', 'value': marital_status}, ]
+        query = apply_filters(query, marital_status_filter, marital_status)
+    if employment_status:
+        employment_status_filter = [{'field':'employment_status', 'op': '==', 'value': employment_status}, ]
+        query = apply_filters(query, employment_status_filter, employment_status)
+    if gender:
+        gender_filter = [{'field':'gender', 'op':'==', 'value':gender}]
+        query =apply_filters(query,gender_filter,gender)
+    # order by
+    if sort_by:
+        sorted_by_fields = [{'field': sort_by, 'direction': 'asc'}]
+        query = apply_sort(query, sorted_by_fields)
+    # pagination
+    query, pagination = apply_pagination(query, page_number=1, page_size=10)
+    if len(query.all()) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No members found")
     members = query.all()
     # update member created_user and updated_user
     for member in members:

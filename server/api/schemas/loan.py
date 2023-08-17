@@ -1,8 +1,10 @@
-from pydantic import BaseModel, EmailStr, Field, Decimal
+from pydantic import BaseModel, EmailStr, Field
+from decimal import Decimal
 from typing import Optional
 from enum import Enum
 import datetime
-
+from .member import Member
+from .user import User
 class LoanStatus(str, Enum):
     created = "created"
     applicated_submitted = "applicated_submitted"
@@ -51,7 +53,7 @@ class LoanApplicationUpdate(BaseModel):
 
 class LoanApplication(BaseModel):
       loan_id: int = Field(..., example=1)
-      member_id: int = Field(..., example=1)
+      member_id: Member
       loan_type: LoanType = Field(..., example="personal")
       requested_amount: Decimal = Field(..., example=10000.00)
       interest_rate: Decimal = Field(..., example=0.15)
@@ -60,8 +62,8 @@ class LoanApplication(BaseModel):
       related_document: Optional[str] = Field(None, example="www.example.jpg")
       created_at: datetime.datetime = Field(...)
       updated_at: datetime.datetime = Field(...)
-      created_by: int = Field(..., example=1)
-      updated_by: int = Field(..., example=1)
+      created_by: User
+      updated_by: User
 
 class LoanTransactionCreate(BaseModel):
     loan_id: int = Field(..., example=1)
@@ -82,7 +84,7 @@ class LoanTransactionUpdate(BaseModel):
 
 class LoanTransaction(BaseModel):
       transaction_id: int = Field(..., example=1)
-      loan_id: int = Field(..., example=1)
+      loan_id: LoanApplication
       transaction_type: TransactionType = Field(..., example="deposit")
       amount: Decimal = Field(..., example=10000.00)
       description: Optional[str] = Field(None, example="deposit")
@@ -91,7 +93,7 @@ class LoanTransaction(BaseModel):
       related_document: Optional[str] = Field(None, example="www.example.jpg")
       created_at: datetime.datetime = Field(...)
       updated_at: datetime.datetime = Field(...)
-      created_by: int = Field(..., example=1)
-      updated_by: int = Field(..., example=1)
+      created_by: User
+      updated_by: User
 
 
