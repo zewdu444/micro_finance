@@ -54,7 +54,7 @@ async def get_users(db: Session = Depends(get_db),
         sorted_by_fields = [{'field': sort_by, 'direction': 'asc'}]
         query = apply_sort(query, sorted_by_fields)
     # pagination
-    query, pagination = apply_pagination(query, page_number=1, page_size=10)
+    query, pagination = apply_pagination(query, page_number=page_number, page_size=page_size)
     if len(query.all()) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found")
     return query.all()

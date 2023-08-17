@@ -11,7 +11,7 @@ class Loan_applications(Base):
     loan_type = Column(String)
     requested_amount = Column(Float)
     interest_rate = Column(Float)
-    loan_status = Column(String)
+    loan_status = Column(String, default="created")
     is_closed = Column(Boolean)
     related_document = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

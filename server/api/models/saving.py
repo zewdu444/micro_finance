@@ -9,7 +9,7 @@ class Saving_applications(Base):
      member_id = Column(Integer, ForeignKey("members.member_id"))
      saving_type = Column(String)
      interest_rate = Column(Float)
-     saving_status = Column(String)
+     saving_status = Column(String, default="created")
      total_amount = Column(Float)
      created_at = Column(DateTime, default=datetime.datetime.utcnow)
      updated_at = Column(DateTime, default=datetime.datetime.utcnow)

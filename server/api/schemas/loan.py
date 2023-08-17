@@ -39,8 +39,6 @@ class LoanApplicationCreate(BaseModel):
     loan_type: LoanType = Field(..., example="personal")
     requested_amount: Decimal = Field(..., example=10000.00)
     interest_rate: Decimal = Field(..., example=0.15)
-    loan_status: LoanStatus = Field(..., example="created")
-    is_closed: bool = Field(..., example=False)
     related_document: Optional[str] = Field(None, example="www.example.jpg")
 
 class LoanApplicationUpdate(BaseModel):

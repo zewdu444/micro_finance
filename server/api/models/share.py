@@ -10,7 +10,7 @@ class Share_applications(Base):
      share_type = Column(String)
      shares_owned = Column(Float)
      total_shares_value = Column(Float)
-     share_status = Column(String)
+     share_status = Column(String, default="created")
      created_at = Column(DateTime, default=datetime.datetime.utcnow)
      updated_at = Column(DateTime, default=datetime.datetime.utcnow)
      created_by = Column(Integer, ForeignKey("users.user_id"))
