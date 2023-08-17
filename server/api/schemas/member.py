@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from enum import Enum
 import datetime
-
+from .user import User
 class Gender(str, Enum):
     male = "male"
     female = "female"
@@ -97,5 +97,5 @@ class Member(BaseModel):
    share_member: bool = Field(...,example=True)
    created_at: datetime.datetime = Field(...)
    updated_at: datetime.datetime = Field(...)
-   created_by: int = Field(..., example=1)
-   updated_by: int = Field(..., example=1)
+   created_by: User
+   updated_by: User

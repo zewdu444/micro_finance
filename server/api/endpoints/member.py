@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 import schemas.member as Member_schemas
 import models.member as Member_models
+import models.user as User_models
 from database import get_db, engine
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Session, Query, joinedload
 from sqlalchemy import  or_
 import datetime
 import os
@@ -58,7 +59,12 @@ async def get_members(db: Session = Depends(get_db),
                  query = query.order_by(column_attr.desc())
             else:
                 query = query.order_by(column_attr.asc())
+
     members = query.all()
+    # update member created_user and updated_user
+    for member in members:
+        member.created_by = db.query(User_models.Users).filter(User_models.Users.user_id == member.created_by).first()
+        member.updated_by = db.query(User_models.Users).filter(User_models.Users.user_id == member.updated_by).first()
     return members
 
 # get member by id
@@ -70,6 +76,8 @@ async def get_member(id: int, db: Session = Depends(get_db), login_user:dict=Dep
     member = db.query(Member_models.Members).filter(Member_models.Members.member_id == id).first()
     if not member:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Member with id {id} not found")
+    member.created_by = db.query(User_models.Users).filter(User_models.Users.user_id == member.created_by).first()
+    member.updated_by = db.query(User_models.Users).filter(User_models.Users.user_id == member.updated_by).first()
     return member
 # create new member
 @router.post("/")
