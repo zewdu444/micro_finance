@@ -5,7 +5,7 @@ import datetime
 
 class Ekub_applications(Base):
      __tablename__ = "ekub_applications"
-     ekub_id = Column(Integer, primary_key=True, index=True)
+     ekub_id = Column(Integer, primary_key=True, index=True,autoincrement=True)
      group_name = Column(String, index=True)
      group_leader = Column(Integer, ForeignKey("members.member_id"))
      rotation_type = Column(String)
@@ -25,17 +25,19 @@ class Ekub_applications(Base):
      created_by = Column(Integer, ForeignKey("users.user_id"))
      updated_by = Column(Integer, ForeignKey("users.user_id"))
      members = relationship("Members", back_populates="ekub_applications")
-     users = relationship("Users", back_populates="ekub_applications")
      ekub_members = relationship("Ekub_members", back_populates="ekub_applications")
+     created_user = relationship("Users", foreign_keys=[created_by], back_populates="ekub_applications_created")
+     updated_user = relationship("Users", foreign_keys=[updated_by], back_populates="ekub_applications_updated")
 class Ekub_members(Base):
       __tablename__ = "ekub_members"
-      ekub_member_id = Column(Integer, primary_key=True, index=True)
+      ekub_member_id = Column(Integer, primary_key=True, index=True,autoincrement=True)
       ekub_id = Column(Integer, ForeignKey("ekub_applications.ekub_id"))
       member_id = Column(Integer, ForeignKey("members.member_id"))
       ekub_member_status = Column(String)
       amount_paid = Column(Float)
       amount_received = Column(Float)
       amount_remaining = Column(Float)
+      scheduled_date = Column(DateTime)
       distribution_order = Column(Integer)
       created_at = Column(DateTime, default=datetime.datetime.utcnow)
       updated_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -43,11 +45,12 @@ class Ekub_members(Base):
       updated_by = Column(Integer, ForeignKey("users.user_id"))
       ekub_applications = relationship("Ekub_applications", back_populates="ekub_members")
       members = relationship("Members", back_populates="ekub_members")
-      users = relationship("Users", back_populates="ekub_members")
       ekub_transactions = relationship("Ekub_transactions", back_populates="ekub_members")
+      created_user = relationship("Users", foreign_keys=[created_by], back_populates="ekub_members_created")
+      updated_user = relationship("Users", foreign_keys=[updated_by], back_populates="ekub_members_updated")
 class Ekub_transactions(Base):
       __tablename__ = "ekub_transactions"
-      transaction_id = Column(Integer, primary_key=True, index=True)
+      transaction_id = Column(Integer, primary_key=True, index=True,autoincrement=True)
       ekub_member_id = Column(Integer, ForeignKey("ekub_members.ekub_member_id"))
       transaction_type = Column(String)
       amount = Column(Float)
@@ -55,9 +58,11 @@ class Ekub_transactions(Base):
       source_account = Column(String)
       destination_account = Column(String)
       related_document = Column(String)
+      schedule_date = Column(DateTime)
       created_at = Column(DateTime, default=datetime.datetime.utcnow)
       updated_at = Column(DateTime, default=datetime.datetime.utcnow)
       created_by = Column(Integer, ForeignKey("users.user_id"))
       updated_by = Column(Integer, ForeignKey("users.user_id"))
       ekub_members = relationship("Ekub_members", back_populates="ekub_transactions")
-      users = relationship("Users", back_populates="ekub_transactions")
+      created_user = relationship("Users", foreign_keys=[created_by], back_populates="ekub_transactions_created")
+      updated_user = relationship("Users", foreign_keys=[updated_by], back_populates="ekub_transactions_updated")

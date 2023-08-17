@@ -6,7 +6,7 @@ import datetime
 
 class Loan_applications(Base):
     __tablename__ = "loan_applications"
-    loan_id = Column(Integer, primary_key=True, index=True)
+    loan_id = Column(Integer, primary_key=True, index=True,autoincrement=True)
     member_id = Column(Integer, ForeignKey("members.member_id"))
     loan_type = Column(String)
     requested_amount = Column(Float)
@@ -18,13 +18,14 @@ class Loan_applications(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
     created_by = Column(Integer, ForeignKey("users.user_id"))
     updated_by = Column(Integer, ForeignKey("users.user_id"))
-    users = relationship("Users",back_populates="loan_applications")
     loan_transactions = relationship("Loan_transactions", back_populates="loan_applications")
     members = relationship("Members", back_populates="loan_applications")
+    created_user = relationship("Users", foreign_keys=[created_by], back_populates="loan_applications_created")
+    updated_user = relationship("Users", foreign_keys=[updated_by], back_populates="loan_applications_updated")
 
 class Loan_transactions(Base):
   __tablename__ = "loan_transactions"
-  transaction_id = Column(Integer, primary_key=True, index=True)
+  transaction_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
   loan_id = Column(Integer, ForeignKey("loan_applications.loan_id"))
   transaction_type = Column(String)
   amount = Column(Float)
@@ -36,5 +37,6 @@ class Loan_transactions(Base):
   updated_at = Column(DateTime, default=datetime.datetime.utcnow)
   created_by = Column(Integer, ForeignKey("users.user_id"))
   updated_by = Column(Integer, ForeignKey("users.user_id"))
-  users = relationship("Users",back_populates="loan_transactions")
   loan_applications = relationship("Loan_applications", back_populates="loan_transactions")
+  created_user = relationship("Users", foreign_keys=[created_by], back_populates="loan_transactions_created")
+  updated_user = relationship("Users", foreign_keys=[updated_by], back_populates="loan_transactions_updated")

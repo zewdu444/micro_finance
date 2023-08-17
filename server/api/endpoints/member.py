@@ -83,8 +83,8 @@ async def create_member(member: Member_schemas.MemberCreate, db: Session = Depen
      new_member=Member_models.Members(**member.dict())
      new_member.updated_at = datetime.datetime.now()
      new_member.created_at = datetime.datetime.now()
-     new_member.created_by = login_user.id
-     new_member.updated_by = login_user.id
+     new_member.created_by = login_user.user_id
+     new_member.updated_by = login_user.user_id
      db.add(new_member)
      db.commit()
      db.refresh(new_member)
@@ -102,7 +102,7 @@ async def update_member(id:int, member:Member_schemas.MemberUpdate, db:Session=D
         for key, value in member.dict(exclude_unset=True).items():
                 setattr(member_update, key, value)
         member_update.updated_at =datetime.datetime.now()
-        member_update.updated_by =login_user.id
+        member_update.updated_by =login_user.user_id
         db.commit()
         return {"message":"Member updated successfully"}
 # delete member
@@ -131,6 +131,6 @@ async def upload_profile_image(id:int, login_user:dict=Depends(get_current_user)
      else:
         member_update_picture.photo = store_picture(file,"../uploads")
         member_update_picture.updated_at =datetime.datetime.utcnow()
-        member_update_picture.updated_by =login_user.id
+        member_update_picture.updated_by =login_user.user_id
         db.commit()
      return {"message": "Profile image uploaded successfully"}

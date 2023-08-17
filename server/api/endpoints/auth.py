@@ -15,7 +15,7 @@ models.Base.metadata.create_all(bind=engine)
 # sectet key
 SECRET_KEY = SECRET_KEY
 ALGORITHM = ALGORITHM
-ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
+ACCESS_TOKEN_EXPIRE_MINUTES = float(ACCESS_TOKEN_EXPIRE_MINUTES)
 
 # password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

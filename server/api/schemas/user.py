@@ -7,6 +7,10 @@ class Role(str, Enum):
    admin = "admin"
    client = "client"
 
+class Status(str, Enum):
+    active ="active"
+    inactive = "inactive"
+
 class UserCreate(BaseModel):
     username: str = Field(..., example="zewdu4")
     firstname: str = Field(..., example="Zewdu")
@@ -25,7 +29,7 @@ class User(BaseModel):
     phone: str = Field(..., example="+251911223344")
     role : Role = Field(..., example="admin")
     photo: Optional[str] = Field(None, example="www.example.jpg")
-    status: bool = Field(..., example=True)
+    user_status: Status = Field(..., example="active")
     created_at: datetime.datetime = Field(...)
     updated_at: datetime.datetime = Field(...)
 
@@ -35,6 +39,7 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = Field(None, example="zewdu444@gmail.com")
     phone: Optional[str] = Field(None, example="+251911223344")
     role : Optional[Role] = Field(None, example="admin")
+    user_status: Optional[Status] = Field(None, example="active")
     photo: Optional[str] = Field(None, example="www.example.jpg")
 
 class UserResetPassword(BaseModel):
