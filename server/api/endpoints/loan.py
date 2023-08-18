@@ -138,3 +138,82 @@ async def delete_loan_application(id: int, db: Session = Depends(get_db), login_
     db.commit()
     return {"message": "Loan application deleted successfully"}
 
+# get loan transactions
+@router.get("/{id}/transactions", response_model=list[Loan_schemas.LoanTransaction])
+async def get_loan_transactions(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+    transactions = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.loan_id == id).all()
+    if len(transactions) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No transactions found")
+    for transaction in transactions:
+        transaction.created_by = db.query(User_models.Users).filter(User_models.Users.user_id == transaction.created_by).first()
+        transaction.updated_by = db.query(User_models.Users).filter(User_models.Users.user_id == transaction.updated_by).first()
+    return transactions
+
+# get loan transaction by id
+@router.get("/{id}/transactions/{transaction_id}", response_model=Loan_schemas.LoanTransaction)
+async def get_loan_transaction(id: int, transaction_id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+    transaction = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.transaction_id == transaction_id).first()
+    if transaction is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+    transaction.created_by = db.query(User_models.Users).filter(User_models.Users.user_id == transaction.created_by).first()
+    transaction.updated_by = db.query(User_models.Users).filter(User_models.Users.user_id == transaction.updated_by).first()
+    return transaction
+
+# new loan transaction
+@router.post("/{id}/transactions")
+async def create_loan_transaction(id: int, transaction: Loan_schemas.LoanTransactionCreate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+    new_transaction = Loan_models.Loan_transactions(**transaction.dict())
+    new_transaction.loan_id = id
+    new_transaction.created_by = login_user.user_id
+    new_transaction.updated_by = login_user.user_id
+    new_transaction.created_at = datetime.datetime.utcnow()
+    new_transaction.updated_at = datetime.datetime.utcnow()
+    if transaction.transaction_type == "deposit":
+        new_transaction.amount = abs(new_transaction.amount)
+    elif transaction.transaction_type == "withdraw":
+        new_transaction.amount = -1 * abs(new_transaction.amount)
+    loan.total_paid += new_transaction.amount
+    loan.total_remaining = loan.total_to_pay - loan.total_paid
+    loan.updated_by = login_user.user_id
+    loan.updated_at = datetime.datetime.utcnow()
+    db.add(new_transaction)
+    db.commit()
+    db.refresh(new_transaction)
+    return {"message": "Transaction created successfully"}
+# delete loan transaction
+@router.delete("/{id}/transactions/{transaction_id}")
+async def delete_loan_transaction(id: int, transaction_id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+    transaction_delete = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.transaction_id == transaction_id).first()
+    if transaction_delete is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+    if transaction_delete.transaction_type == "deposit":
+        loan.total_paid -= transaction_delete.amount
+        loan.total_remaining = loan.total_to_pay - loan.total_paid
+    elif transaction_delete.transaction_type == "withdraw":
+        loan.total_paid += transaction_delete.amount
+        loan.total_remaining = loan.total_to_pay - loan.total_paid
+    loan.updated_by = login_user.user_id
+    loan.updated_at = datetime.datetime.utcnow()
+    db.delete(transaction_delete)
+    db.commit()
+    return {"message": "Transaction deleted successfully"}

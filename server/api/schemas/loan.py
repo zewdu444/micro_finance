@@ -71,7 +71,6 @@ class LoanApplication(BaseModel):
       updated_by: User
 
 class LoanTransactionCreate(BaseModel):
-    loan_id: int = Field(..., example=1)
     transaction_type: TransactionType = Field(..., example="deposit")
     amount: FiniteFloat = Field(..., example=10000.00)
     description: Optional[str] = Field(None, example="deposit")
@@ -89,7 +88,7 @@ class LoanTransactionUpdate(BaseModel):
 
 class LoanTransaction(BaseModel):
       transaction_id: int = Field(..., example=1)
-      loan_id: LoanApplication
+      loan_id: int = Field(..., example=1)
       transaction_type: TransactionType = Field(..., example="deposit")
       amount: FiniteFloat = Field(..., example=10000.00)
       description: Optional[str] = Field(None, example="deposit")
