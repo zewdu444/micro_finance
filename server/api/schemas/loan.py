@@ -1,5 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
-from decimal import Decimal
+from pydantic import BaseModel, EmailStr, Field, FiniteFloat
 from typing import Optional
 from enum import Enum
 import datetime
@@ -37,14 +36,16 @@ class TransactionType(str, Enum):
 class LoanApplicationCreate(BaseModel):
     member_id: int = Field(..., example=1)
     loan_type: LoanType = Field(..., example="personal")
-    requested_amount: Decimal = Field(..., example=10000.00)
-    interest_rate: Decimal = Field(..., example=0.15)
+    loan_term: FiniteFloat = Field(..., example=12)
+    requested_amount: FiniteFloat = Field(..., example=10000.00)
+    interest_rate: FiniteFloat = Field(..., example=0.15)
     related_document: Optional[str] = Field(None, example="www.example.jpg")
 
 class LoanApplicationUpdate(BaseModel):
     loan_type: Optional[LoanType] = Field(None, example="personal")
-    requested_amount: Optional[Decimal] = Field(None, example=10000.00)
-    interest_rate: Optional[Decimal] = Field(None, example=0.15)
+    loan_term: Optional[FiniteFloat] = Field(None, example=12)
+    requested_amount: Optional[FiniteFloat] = Field(None, example=10000.00)
+    interest_rate: Optional[FiniteFloat] = Field(None, example=0.15)
     loan_status: Optional[LoanStatus] = Field(None, example="created")
     is_closed: Optional[bool] = Field(None, example=False)
     related_document: Optional[str] = Field(None, example="www.example.jpg")
@@ -53,8 +54,14 @@ class LoanApplication(BaseModel):
       loan_id: int = Field(..., example=1)
       member_id: Member
       loan_type: LoanType = Field(..., example="personal")
-      requested_amount: Decimal = Field(..., example=10000.00)
-      interest_rate: Decimal = Field(..., example=0.15)
+      loan_term: FiniteFloat = Field(..., example=12)
+      requested_amount: FiniteFloat = Field(..., example=10000.00)
+      interest_rate: FiniteFloat = Field(..., example=0.15)
+      total_to_pay: FiniteFloat = Field(..., example=11500.00)
+      total_interest: FiniteFloat = Field(..., example=1500.00)
+      per_month_payment: FiniteFloat = Field(..., example=958.33)
+      total_paid: FiniteFloat = Field(..., example=0.00)
+      total_remaining: FiniteFloat = Field(..., example=11500.00)
       loan_status: LoanStatus = Field(..., example="created")
       is_closed: bool = Field(..., example=False)
       related_document: Optional[str] = Field(None, example="www.example.jpg")
@@ -66,7 +73,7 @@ class LoanApplication(BaseModel):
 class LoanTransactionCreate(BaseModel):
     loan_id: int = Field(..., example=1)
     transaction_type: TransactionType = Field(..., example="deposit")
-    amount: Decimal = Field(..., example=10000.00)
+    amount: FiniteFloat = Field(..., example=10000.00)
     description: Optional[str] = Field(None, example="deposit")
     source_account: Optional[str] = Field(None, example="CBE-1234567890")
     destination_account: Optional[str] = Field(None, example="CBE-1234567890")
@@ -74,7 +81,7 @@ class LoanTransactionCreate(BaseModel):
 
 class LoanTransactionUpdate(BaseModel):
     transaction_type: Optional[TransactionType] = Field(None, example="deposit")
-    amount: Optional[Decimal] = Field(None, example=10000.00)
+    amount: Optional[FiniteFloat] = Field(None, example=10000.00)
     description: Optional[str] = Field(None, example="deposit")
     source_account: Optional[str] = Field(None, example="CBE-1234567890")
     destination_account: Optional[str] = Field(None, example="CBE-1234567890")
@@ -84,7 +91,7 @@ class LoanTransaction(BaseModel):
       transaction_id: int = Field(..., example=1)
       loan_id: LoanApplication
       transaction_type: TransactionType = Field(..., example="deposit")
-      amount: Decimal = Field(..., example=10000.00)
+      amount: FiniteFloat = Field(..., example=10000.00)
       description: Optional[str] = Field(None, example="deposit")
       source_account: Optional[str] = Field(None, example="CBE-1234567890")
       destination_account: Optional[str] = Field(None, example="CBE-1234567890")

@@ -13,7 +13,7 @@ import uuid
 from typing import Optional
 from .auth import get_current_user, get_user_exception
 from sqlalchemy_filters import apply_filters, apply_sort, apply_pagination
-
+from utils.loan_calculator import loan_calculator
 # from utils.fileupload import store_picture
 
 router = APIRouter(prefix="/loans", tags=["loans"], responses={404: {"description": "Not found"}})
@@ -92,12 +92,13 @@ async def get_loan(id: int, db: Session = Depends(get_db), login_user:dict=Depen
     loan.updated_by = db.query(User_models.Users).filter(User_models.Users.user_id == loan.updated_by).first()
     return loan
 
-# update new loan application
+# new loan application
 @router.post("/")
 async def create_loan_application(loan: Loan_schemas.LoanApplicationCreate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
     if login_user is None:
         raise get_user_exception
     new_loan = Loan_models.Loan_applications(**loan.dict())
+    new_loan.total_to_pay, new_loan.per_month_payment, new_loan.total_interest = loan_calculator(loan.loan_term, loan.requested_amount, loan.interest_rate)
     new_loan.loan_status = "created"
     new_loan.is_closed = False
     new_loan.created_by = login_user.user_id
@@ -108,3 +109,32 @@ async def create_loan_application(loan: Loan_schemas.LoanApplicationCreate, db: 
     db.commit()
     db.refresh(new_loan)
     return {"message": "Loan application created successfully"}
+
+# update loan application
+@router.put("/{id}")
+async def update_loan_application(id: int, loan: Loan_schemas.LoanApplicationUpdate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan_update = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan_update is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan application not found")
+    for var, value in vars(loan).items():
+        if value is not None:
+            setattr(loan_update, var, value)
+    loan_update.updated_by = login_user.user_id
+    loan_update.updated_at = datetime.datetime.utcnow()
+    db.commit()
+    return {"message": "Loan application updated successfully"}
+
+# delete loan application
+@router.delete("/{id}")
+async def delete_loan_application(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan_delete = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan_delete is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan application not found")
+    db.delete(loan_delete)
+    db.commit()
+    return {"message": "Loan application deleted successfully"}
+
