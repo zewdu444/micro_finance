@@ -4,7 +4,7 @@ import models.user as User_models
 import models.loan as Loan_models
 import schemas.loan as Loan_schemas
 from database import get_db, engine
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Session, Query, subqueryload
 from sqlalchemy import  or_
 import datetime
 import os
@@ -13,13 +13,14 @@ import uuid
 from typing import Optional
 from .auth import get_current_user, get_user_exception
 from sqlalchemy_filters import apply_filters, apply_sort, apply_pagination
+
 # from utils.fileupload import store_picture
 
 router = APIRouter(prefix="/loans", tags=["loans"], responses={404: {"description": "Not found"}})
 Loan_models.Base.metadata.create_all(bind=engine)
 
 #  get all loans
-@router.get("/", response_model=list[Loan_schemas.LoanApplication])
+@router.get("/", response_model= list[Loan_schemas.LoanApplication])
 async def get_loans(db: Session = Depends(get_db),
                       login_user:dict=Depends(get_current_user),
                       search: Optional[str] = None,
@@ -60,13 +61,21 @@ async def get_loans(db: Session = Depends(get_db),
     if len(query.all()) == 0:
       raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No loans found")
     loans = query.all()
+    # add code here to display nested loans, members, users
+    member_creater= []
+    member_updater = []
     for loan in loans:
-        loan.member_id = db.query(Member_models.Members).filter(Member_models.Members.member_id == loan.member_id).first()
-        loan.member_id.created_by = db.query(User_models.Users).filter(User_models.Users.user_id == loan.member_id.created_by).first()
-        loan.member_id.updated_by = db.query(User_models.Users).filter(User_models.Users.user_id == loan.member_id.updated_by).first()
-        loan.created_by = db.query(User_models.Users).filter(User_models.Users.user_id == loan.created_by).first()
-        loan.updated_by = db.query(User_models.Users).filter(User_models.Users.user_id == loan.updated_by).first()
+         loan.member_id = db.query(Member_models.Members).get(loan.member_id)
+         member_creater.append(loan.member_id.created_by)
+         member_updater.append(loan.member_id.updated_by)
+         loan.created_by = db.query(User_models.Users).get(loan.created_by)
+         loan.updated_by = db.query(User_models.Users).get(loan.updated_by)
+    for loan, member in zip(loans, member_creater):
+         loan.member_id.created_by = db.query(User_models.Users).get(member)
+    for loan, member in zip(loans, member_updater):
+          loan.member_id.updated_by = db.query(User_models.Users).get(member)
     return loans
+
 
 # get loan by id
 @router.get("/{id}", response_model=Loan_schemas.LoanApplication)
