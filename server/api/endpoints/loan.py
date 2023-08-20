@@ -14,7 +14,7 @@ from typing import Optional
 from .auth import get_current_user, get_user_exception
 from sqlalchemy_filters import apply_filters, apply_sort, apply_pagination
 from utils.loan_calculator import loan_calculator
-# from utils.fileupload import store_picture
+from utils.fileupload import store_file
 
 router = APIRouter(prefix="/loans", tags=["loans"], responses={404: {"description": "Not found"}})
 Loan_models.Base.metadata.create_all(bind=engine)
@@ -94,7 +94,9 @@ async def get_loan(id: int, db: Session = Depends(get_db), login_user:dict=Depen
 
 # new loan application
 @router.post("/")
-async def create_loan_application(loan: Loan_schemas.LoanApplicationCreate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+async def create_loan_application(loan: Loan_schemas.LoanApplicationCreate,
+                                  db: Session = Depends(get_db),
+                                  login_user:dict=Depends(get_current_user)):
     if login_user is None:
         raise get_user_exception
     new_loan = Loan_models.Loan_applications(**loan.dict())
@@ -279,3 +281,65 @@ async def delete_loan_transaction(id: int, transaction_id: int, db: Session = De
     db.delete(transaction_delete)
     db.commit()
     return {"message": "Transaction deleted successfully"}
+
+# upload loan related document
+@router.post("/{id}/upload")
+async def upload_loan_related_document(id: int, file: UploadFile = File(...), db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+    loan.related_document = store_file(file, "../uploads/loans")
+    loan.updated_by = login_user.user_id
+    loan.updated_at = datetime.datetime.utcnow()
+    db.commit()
+    return {"message": "Loan related document uploaded successfully"}
+
+# delete loan related document
+@router.delete("/{id}/upload")
+async def delete_loan_related_document(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+       if login_user is None:
+            raise get_user_exception
+       loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+       if loan is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+       loan.related_document = None
+       loan.updated_by = login_user.user_id
+       loan.updated_at = datetime.datetime.utcnow()
+       db.commit()
+       return {"message": "Loan related document deleted successfully"}
+
+# upload loan transaction related document
+@router.post("/{id}/transactions/{transaction_id}/upload")
+async def upload_loan_transaction_related_document(id: int, transaction_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+      if login_user is None:
+          raise get_user_exception
+      loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+      if loan is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+      transaction = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.transaction_id == transaction_id).first()
+      if transaction is None:
+              raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+      transaction.related_document = store_file(file, "../uploads/loans")
+      transaction.updated_by = login_user.user_id
+      transaction.updated_at = datetime.datetime.utcnow()
+      db.commit()
+      return {"message": "Loan transaction related document uploaded successfully"}
+
+# delete loan transaction related document
+@router.delete("/{id}/transactions/{transaction_id}/upload")
+async def delete_loan_transaction_related_document(id: int, transaction_id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+         if login_user is None:
+                raise get_user_exception
+         loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+         if loan is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+         transaction = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.transaction_id == transaction_id).first()
+         if transaction is None:
+                  raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+         transaction.related_document = None
+         transaction.updated_by = login_user.user_id
+         transaction.updated_at = datetime.datetime.utcnow()
+         db.commit()
+         return {"message": "Loan transaction related document deleted successfully"}

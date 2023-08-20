@@ -149,8 +149,23 @@ async def upload_profile_image(id:int, login_user:dict=Depends(get_current_user)
      if member_update_picture is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"member with id {id} not found")
      else:
-        member_update_picture.photo = store_picture(file,"../uploads")
+        member_update_picture.photo = store_picture(file,"../uploads/profile/")
         member_update_picture.updated_at =datetime.datetime.utcnow()
         member_update_picture.updated_by =login_user.user_id
         db.commit()
      return {"message": "Profile image uploaded successfully"}
+
+#  delete profile picture
+@router.delete("/deleteprofile/{id}")
+async def delete_profile_image(id:int, login_user:dict=Depends(get_current_user), db: Session = Depends(get_db)):
+        if login_user is None:
+            raise get_user_exception
+        member_delete_picture = db.query(Member_models.Members).filter(Member_models.Members.member_id == id).first()
+        if member_delete_picture is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"member with id {id} not found")
+        else:
+            member_delete_picture.photo = None
+            member_delete_picture.updated_at =datetime.datetime.utcnow()
+            member_delete_picture.updated_by =login_user.user_id
+            db.commit()
+            return {"message": "Profile image deleted successfully"}

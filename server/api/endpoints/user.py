@@ -106,11 +106,23 @@ async def upload_profile_image(user:dict=Depends(get_current_user), file: Upload
      if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
          raise HTTPException(status_code=400, detail="File must be an image")
      login_user =db.query(models.Users).filter(models.Users.username==user.username).first()
-     login_user.photo = store_picture(file,"../uploads")
+     login_user.photo = store_picture(file,"../uploads/profile/")
      login_user.updated_at =datetime.datetime.utcnow()
      db.add(login_user)
      db.commit()
      return {"message": "Profile image uploaded successfully"}
+
+ # delete user photo
+@router.delete("/deleteprofile")
+async def delete_profile_image(user:dict=Depends(get_current_user), db: Session = Depends(get_db)):
+        if user is None:
+            raise get_user_exception
+        login_user =db.query(models.Users).filter(models.Users.username==user.username).first()
+        login_user.photo = None
+        login_user.updated_at =datetime.datetime.utcnow()
+        db.add(login_user)
+        db.commit()
+        return {"message": "Profile image deleted successfully"}
 
 def http_exception(status_code, detail):
     raise HTTPException(status_code=status_code, detail=detail)

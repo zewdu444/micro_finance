@@ -39,7 +39,6 @@ class LoanApplicationCreate(BaseModel):
     loan_term: FiniteFloat = Field(..., example=12)
     requested_amount: FiniteFloat = Field(..., example=10000.00)
     interest_rate: FiniteFloat = Field(..., example=0.15)
-    related_document: Optional[str] = Field(None, example="www.example.jpg")
 
 class LoanApplicationUpdate(BaseModel):
     loan_type: Optional[LoanType] = Field(None, example="personal")
@@ -48,7 +47,6 @@ class LoanApplicationUpdate(BaseModel):
     interest_rate: Optional[FiniteFloat] = Field(None, example=0.15)
     loan_status: Optional[LoanStatus] = Field(None, example="created")
     is_closed: Optional[bool] = Field(None, example=False)
-    related_document: Optional[str] = Field(None, example="www.example.jpg")
 
 class LoanApplication(BaseModel):
       loan_id: int = Field(..., example=1)
@@ -76,7 +74,6 @@ class LoanTransactionCreate(BaseModel):
     description: Optional[str] = Field(None, example="deposit")
     source_account: Optional[str] = Field(None, example="CBE-1234567890")
     destination_account: Optional[str] = Field(None, example="CBE-1234567890")
-    related_document: Optional[str] = Field(None, example="www.example.jpg")
 
 class LoanTransactionUpdate(BaseModel):
     transaction_type: Optional[TransactionType] = Field(None, example="deposit")
@@ -84,7 +81,6 @@ class LoanTransactionUpdate(BaseModel):
     description: Optional[str] = Field(None, example="deposit")
     source_account: Optional[str] = Field(None, example="CBE-1234567890")
     destination_account: Optional[str] = Field(None, example="CBE-1234567890")
-    related_document: Optional[str] = Field(None, example="www.example.jpg")
 
 class LoanTransaction(BaseModel):
       transaction_id: int = Field(..., example=1)
