@@ -140,13 +140,44 @@ async def delete_loan_application(id: int, db: Session = Depends(get_db), login_
 
 # get loan transactions
 @router.get("/{id}/transactions", response_model=list[Loan_schemas.LoanTransaction])
-async def get_loan_transactions(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+async def get_loan_transactions(id: int, db: Session = Depends(get_db),
+                                login_user:dict=Depends(get_current_user),
+                                search: Optional[str] = None,
+                                transaction_type: Optional[str] = None,
+                                sort_by: Optional[str] = None,
+                                page_number: Optional[int] = 1,
+                                page_size: Optional[int] = 10):
     if login_user is None:
         raise get_user_exception
     loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
     if loan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
-    transactions = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.loan_id == id).all()
+    query :Query = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.loan_id == id)
+    # search
+    if search:
+        search_term = f"%{search}%"
+        search_fields = [
+            {
+              'or': [
+                {'field':'transaction_type', 'op':'ilike', 'value':search_term},
+                {'field':'description', 'op':'ilike', 'value':search_term},
+                {'field':'source_account', 'op':'ilike', 'value':search_term},
+                {'field':'destination_account', 'op':'ilike', 'value':search_term},
+               ]
+            }
+         ]
+        query = apply_filters(query, search_fields, search_term)
+    # filter by field
+    if transaction_type:
+        transaction_type_filter = [{'field':'transaction_type', 'op': '==', 'value': transaction_type}, ]
+        query = apply_filters(query, transaction_type_filter, transaction_type)
+    # order by
+    if sort_by:
+        sorted_by_fields = [{'field': sort_by, 'direction': 'asc'}]
+        query = apply_sort(query, sorted_by_fields)
+    # pagination
+    query, pagination = apply_pagination(query, page_number=page_number, page_size=page_size)
+    transactions = query.all()
     if len(transactions) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No transactions found")
     for transaction in transactions:
@@ -195,6 +226,37 @@ async def create_loan_transaction(id: int, transaction: Loan_schemas.LoanTransac
     db.commit()
     db.refresh(new_transaction)
     return {"message": "Transaction created successfully"}
+
+# update loan transaction
+
+@router.put("/{id}/transactions/{transaction_id}")
+async def update_loan_transaction(id: int, transaction_id: int, transaction: Loan_schemas.LoanTransactionUpdate, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+          raise get_user_exception
+    loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    if loan is None:
+          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+    transaction_update = db.query(Loan_models.Loan_transactions).filter(Loan_models.Loan_transactions.transaction_id == transaction_id).first()
+    if transaction_update is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction not found")
+    for var, value in vars(transaction).items():
+        if value is not None:
+            setattr(transaction_update, var, value)
+    if transaction_update.transaction_type == "deposit":
+        loan.total_paid -= transaction_update.amount
+        loan.total_remaining = loan.total_to_pay - loan.total_paid
+    elif transaction_update.transaction_type == "withdraw":
+        loan.total_paid += transaction_update.amount
+        loan.total_remaining = loan.total_to_pay - loan.total_paid
+    loan.updated_by = login_user.user_id
+    loan.updated_at = datetime.datetime.utcnow()
+    transaction_update.updated_by = login_user.user_id
+    transaction_update.updated_at = datetime.datetime.utcnow()
+    db.commit()
+    return {"message": "Transaction updated successfully"}
+
+
+
 # delete loan transaction
 @router.delete("/{id}/transactions/{transaction_id}")
 async def delete_loan_transaction(id: int, transaction_id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):

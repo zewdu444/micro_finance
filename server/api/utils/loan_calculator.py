@@ -1,4 +1,4 @@
-# loan calucatr per month payment
+# loan calculator per month payment
 
 def loan_calculator(loan_term, requested_amount, interest_rate):
     monthly_interest_rate = ((1 + interest_rate) ** (1 / 12)) - 1
