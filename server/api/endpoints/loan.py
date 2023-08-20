@@ -103,6 +103,7 @@ async def create_loan_application(loan: Loan_schemas.LoanApplicationCreate,
         raise get_user_exception
     new_loan = Loan_models.Loan_applications(**loan.dict())
     new_loan.total_to_pay, new_loan.per_month_payment, new_loan.total_interest = loan_calculator(loan.loan_term, loan.requested_amount, loan.interest_rate)
+    new_loan.total_remaining = new_loan.total_to_pay - new_loan.total_paid
     new_loan.loan_status = "created"
     new_loan.is_closed = False
     new_loan.created_by = login_user.user_id
