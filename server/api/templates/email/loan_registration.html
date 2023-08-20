@@ -1,0 +1,70 @@
+<html>
+<body style="margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; background: #efefef;">
+    <div style="width: 100%; border-radius: 10px; padding: 10px;">
+        <div style="margin: 0 auto; width: 90%; text-align: center;">
+            <h1 style="margin: 5px auto; background: #008080; color: white; width: 40%; border-radius: 10px; padding: 20px 50px;">Loan Application</h1>
+            <div style="margin: 10px auto; background: white; width: 40%; border-radius: 10px; padding: 50px; ">
+                <h3 style="margin-bottom: 10px; font-size: 24px; color: black; text-align: left;">Hi {{ data.member_name }},</h3>
+                <p style="margin-bottom: 30px; color: black; text-align: left;">We want to inform you about the status of your loan application:</p>
+                <table style="width: 100%; text-align: left; margin-bottom: 30px; color: black; border-collapse: collapse; border: 1px solid #ddd;">
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Loan ID:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ data.loan_id }}</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Loan Type:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ data.loan_type }}</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Requested Amount:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ '{:,.2f}'.format(data.requested_amount) }} birr</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Loan Term:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ data.loan_term }} months</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Interest Rate:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ data.interest_rate * 100 }} %</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Total to Pay:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ '{:,.2f}'.format(data.total_to_pay) }} birr</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Per Month Payment:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ '{:,.2f}'.format(data.per_month_payment) }} birr</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Total Interest:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ '{:,.2f}'.format(data.total_interest) }} birr</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Loan Status:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ data.loan_status }}</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Total Paid:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ '{:,.2f}'.format(data.total_paid) }} birr</td>
+                    </tr>
+                    <tr style="border: 1px solid #ddd;">
+                        <td>Total Remaining:</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ '{:,.2f}'.format(data.total_remaining) }} birr</td>
+                    </tr>
+                </table>
+                <a style="display: block; margin: 0 auto; border: none; background-color: #008080; color: white; width: 50%; line-height: 24px; padding: 10px; font-size: 20px; border-radius: 10px; cursor: pointer; text-decoration: none;"
+                    href="https://portfolio-cpgd.onrender.com/"
+                    target="_blank"
+                >
+                   View Details
+                </a>
+                <p style="margin-bottom: 30px; color: rgb(123, 122, 122); font-size: 15px; text-align: center;">If you have any questions, please contact us.</p>
+            </div>
+        </div>
+    </div>
+    <div style="width: 100%; padding: 20px; text-align: center;">
+        <p style="width: 40%; color: #555; font-size: 14px;margin: auto;">For any inquiries, please contact us at: <a href="mailto:zewdu444@gmail.com" style="color: #008080; text-decoration: none;">zewdu444@gmail.com</a></p>
+        <p style="width: 40%; color: #555; font-size: 14px; margin: auto;">&copy; 2023 Micro Finance. All rights reserved.</p>
+    </div>
+</body>
+</html>

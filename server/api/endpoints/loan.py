@@ -15,6 +15,8 @@ from .auth import get_current_user, get_user_exception
 from sqlalchemy_filters import apply_filters, apply_sort, apply_pagination
 from utils.loan_calculator import loan_calculator
 from utils.fileupload import store_file
+from utils.email import loan_registration_mail
+from schemas.email import LoanRequestSchema
 
 router = APIRouter(prefix="/loans", tags=["loans"], responses={404: {"description": "Not found"}})
 Loan_models.Base.metadata.create_all(bind=engine)
@@ -245,11 +247,12 @@ async def update_loan_transaction(id: int, transaction_id: int, transaction: Loa
         if value is not None:
             setattr(transaction_update, var, value)
     if transaction_update.transaction_type == "deposit":
-        loan.total_paid -= transaction_update.amount
-        loan.total_remaining = loan.total_to_pay - loan.total_paid
+        transaction_update.amount = abs(transaction_update.amount)
     elif transaction_update.transaction_type == "withdraw":
         loan.total_paid += transaction_update.amount
-        loan.total_remaining = loan.total_to_pay - loan.total_paid
+        transaction_update.amount = -1 * abs(transaction_update.amount)
+    lon.total_paid += transaction_update.amount
+    loan.total_remaining = loan.total_to_pay - loan.total_paid
     loan.updated_by = login_user.user_id
     loan.updated_at = datetime.datetime.utcnow()
     transaction_update.updated_by = login_user.user_id
@@ -343,3 +346,42 @@ async def delete_loan_transaction_related_document(id: int, transaction_id: int,
          transaction.updated_at = datetime.datetime.utcnow()
          db.commit()
          return {"message": "Loan transaction related document deleted successfully"}
+
+# send loan application email
+@router.post("/{id}/sendemail")
+async def send_loan_application_email(id: int, db: Session = Depends(get_db), login_user:dict=Depends(get_current_user)):
+    if login_user is None:
+        raise get_user_exception
+    loan = db.query(Loan_models.Loan_applications).filter(Loan_models.Loan_applications.loan_id == id).first()
+    member = db.query(Member_models.Members).filter(Member_models.Members.member_id == loan.member_id).first()
+    if loan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found")
+    if member is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Member not found")
+    loan_application_data ={
+       "email": ["zewdu.erkyhun@yandex.com"],
+       "subject": "Regarding your loan application with us ",
+       "body":{
+           "data": {
+              "loan_id": loan.loan_id,
+              "member_name": member.firstname + " " + member.lastname,
+              "member_phone": member.phone,
+              "loan_type": loan.loan_type,
+              "requested_amount": loan.requested_amount,
+              "loan_term": loan.loan_term,
+              "interest_rate": loan.interest_rate,
+              "total_to_pay": loan.total_to_pay,
+              "per_month_payment": loan.per_month_payment,
+              "total_interest": loan.total_interest,
+              "loan_status": loan.loan_status,
+              "total_paid": loan.total_paid,
+              "total_remaining": loan.total_remaining
+              }
+        }
+    }
+    try:
+       await  loan_registration_mail(LoanRequestSchema(**loan_application_data))
+       return {"message": "Loan application email sent successfully"}
+    except:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loan application email not sent")
+

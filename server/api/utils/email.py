@@ -1,5 +1,5 @@
 from pathlib import Path
-from schemas.email import  PasswordRequestSchema
+from schemas.email import  PasswordRequestSchema, LoanRequestSchema
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from config  import MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM, MAIL_PORT, MAIL_SERVER, MAIL_FROM_NAME
 
@@ -22,4 +22,14 @@ async def password_request_mail(email:PasswordRequestSchema):
          subtype= MessageType.html)
     fm = FastMail(conf)
     await fm.send_message(message, template_name="password_reset.html")
+    return {"message" : "email has been sent"}
+
+async def loan_registration_mail(email:LoanRequestSchema):
+    message = MessageSchema(
+         subject=email.dict().get("subject"),
+         recipients=email.dict().get("email"),
+         template_body=email.dict().get("body"),
+         subtype= MessageType.html)
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="loan_registration.html")
     return {"message" : "email has been sent"}
