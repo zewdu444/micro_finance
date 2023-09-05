@@ -3,8 +3,6 @@ import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -34,8 +32,11 @@ export default function Register() {
             alignItems: 'center',
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main',
+          width: 60,
+          height: 60
+        }}>
+          <AccountBalanceIcon  fontSize='large' />
           </Avatar>
           <Typography component="h1" variant="h5">
             Sign up
@@ -84,7 +85,6 @@ export default function Register() {
                   autoComplete="new-password"
                 />
               </Grid>
-
             </Grid>
             <Button
               type="submit"

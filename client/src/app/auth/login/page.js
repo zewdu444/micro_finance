@@ -2,7 +2,7 @@
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
@@ -66,8 +66,11 @@ export default function Login() {
             alignItems: 'center',
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main',
+          width: 60,
+          height: 60
+        }}>
+            <AccountBalanceIcon  fontSize='large' />
           </Avatar>
           <Typography component="h1" variant="h5">
             Sign in

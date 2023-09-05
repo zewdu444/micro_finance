@@ -6,11 +6,11 @@ import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import CopyRight from '../components/CopyRight';
-import { Stack } from '@mui/material';
+
 
 export default function ResetByEmail() {
   const handleSubmit = (event) => {
@@ -33,8 +33,11 @@ export default function ResetByEmail() {
             alignItems: 'center',
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' ,
+          width: 60,
+          height: 60
+        }}>
+          <AccountBalanceIcon  fontSize='large' />
           </Avatar>
           <Typography component="h1" variant="h5">
             Forget your password?
