@@ -69,16 +69,13 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Sessi
          raise get_login_exception()
       access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
       access_token = create_access_token(data={"username": user.username}, expires_delta=access_token_expires)
-      user ={
-         "username": user.username,
-         "firstname": user.firstname,
-         "lastname": user.lastname,
-         "email": user.email,
-         "phone": user.phone,
-         "role": user.role,
-         "photo": user.photo
-      }
-      return {"user": user,"access_token": access_token}
+
+      return {"accessToken": access_token,
+              "expires":access_token_expires,
+               "name":user.username,
+               "email":user.email,
+               "image":user.photo
+               }
 
 @router.post("/register")
 async def  user_registration(user: schemas.UserCreate, db: Session = Depends(get_db)):

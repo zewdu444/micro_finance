@@ -12,13 +12,16 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-
+import { signIn } from 'next-auth/react';
+import { useRouter } from "next/navigation"
+import Alert from '@mui/material/Alert';
+import { useState } from 'react';
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
+      <Link color="inherit" href="https://portfolio-cpgd.onrender.com/">
+        Micro Finance
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -26,17 +29,22 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
-
 export default function Login() {
-  const handleSubmit = (event) => {
+  const [open, setOpen] = useState(false);
+  const router = useRouter()
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
+    const res = await signIn('credentials', {
+      username: data.get('username'),
       password: data.get('password'),
-    });
+      redirect: false,
+    })
+    if (res.error === "Invalid credentials") {
+      setOpen(true)
+    } else {
+      router.push("/dashboard")
+    }
   };
 
   return (
@@ -57,15 +65,18 @@ export default function Login() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
+          <Alert
+          sx = {{display: open ? "inline-flex" : "none"}}
+          severity="error">The username or password you entered is incorrect</Alert>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="Username"
+              name="username"
+              autoComplete="username"
               autoFocus
             />
             <TextField
@@ -97,7 +108,7 @@ export default function Login() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/auth/register" variant="body2">
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>

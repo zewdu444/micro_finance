@@ -1,7 +1,6 @@
 import NextAuth  from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios  from "axios";
-import { redirect } from "next/dist/server/api-utils";
 const handler= NextAuth({
     providers: [
         CredentialsProvider({
@@ -27,12 +26,12 @@ const handler= NextAuth({
            })
            const user = await res.json();
            if (!res.ok) {
-            throw new Error(user.message);
+              throw new Error("Invalid credentials");
             }
 
             if (res.ok && user) {
 
-              return user
+              return user;
             }
             return null
           }
