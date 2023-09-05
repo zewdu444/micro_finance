@@ -16,21 +16,12 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from "next/navigation"
 import Alert from '@mui/material/Alert';
 import { useState } from 'react';
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://portfolio-cpgd.onrender.com/">
-        Micro Finance
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+import CopyRight from '../components/CopyRight';
+
 
 export default function Login() {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter()
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -42,15 +33,31 @@ export default function Login() {
     })
     if (res.error === "Invalid credentials") {
       setOpen(true)
-    } else {
-      router.push("/dashboard")
+       // Use setTimeout to set open back to false after 3 seconds
+     setError("The username or password you entered is incorrect")
+     setTimeout(() => {
+     setOpen(false);
+     }, 3000); // 3000 milliseconds = 3 seconds
+
     }
+    if(res.error === "fetch failed") {
+      setOpen(true)
+      // Use setTimeout to set open back to false after 3 seconds
+    setError("Network Error")
+    setTimeout(() => {
+    setOpen(false);
+    }, 3000); // 3000 milliseconds = 3 seconds
+    }
+     if(res.ok && res.url) {
+      router.push("/dashboard")
+     }
+
+
   };
 
   return (
 
       <Container component="main" maxWidth="xs">
-        <CssBaseline />
         <Box
           sx={{
             marginTop: 8,
@@ -67,7 +74,7 @@ export default function Login() {
           </Typography>
           <Alert
           sx = {{display: open ? "inline-flex" : "none"}}
-          severity="error">The username or password you entered is incorrect</Alert>
+          severity="error">{error}</Alert>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
@@ -103,7 +110,7 @@ export default function Login() {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                <Link href="/auth/resetbyemail" variant="body2">
                   Forgot password?
                 </Link>
               </Grid>
@@ -115,8 +122,7 @@ export default function Login() {
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 8, mb: 4 }} />
+        <CopyRight sx={{ mt: 8, mb: 4 }} />
       </Container>
   );
-
   }
