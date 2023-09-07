@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import CopyRight from '../components/CopyRight';
@@ -36,7 +36,7 @@ export default function Register() {
           width: 60,
           height: 60
         }}>
-          <AccountBalanceIcon  fontSize='large' />
+        <AccountBalanceIcon  fontSize='large' />
           </Avatar>
           <Typography component="h1" variant="h5">
             Sign up
