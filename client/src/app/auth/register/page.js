@@ -75,6 +75,16 @@ export default function Register() {
                 />
               </Grid>
               <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="phone_number"
+                label="Phone Number"
+                name="phone_number"
+                autoComplete="phone_number"
+              />
+            </Grid>
+              <Grid item xs={12}>
                 <TextField
                   required
                   fullWidth
@@ -85,6 +95,17 @@ export default function Register() {
                   autoComplete="new-password"
                 />
               </Grid>
+              <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                name="confirm_password"
+                label="Confirm Password"
+                type="password"
+                id="confirm_password"
+                autoComplete="confirm-new-password"
+              />
+            </Grid>
             </Grid>
             <Button
               type="submit"
