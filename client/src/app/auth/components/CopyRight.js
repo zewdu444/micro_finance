@@ -7,6 +7,7 @@ function CopyRight(props) {
     {'Copyright © '}
     <Link color="inherit" href="https://portfolio-cpgd.onrender.com/"
      underline='none'
+     target="_blank"
     >
       Micro Finance
     </Link>{' '}
