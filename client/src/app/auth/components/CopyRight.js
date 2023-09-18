@@ -5,7 +5,9 @@ function CopyRight(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
     {'Copyright © '}
-    <Link color="inherit" href="https://portfolio-cpgd.onrender.com/">
+    <Link color="inherit" href="https://portfolio-cpgd.onrender.com/"
+     underline='none'
+    >
       Micro Finance
     </Link>{' '}
     {new Date().getFullYear()}
